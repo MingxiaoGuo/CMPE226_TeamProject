@@ -9,7 +9,7 @@ var http = require('http');
 var async = require("async");
 var request = require("request");
 var mysql = require("mysql");
-var connection = mysql.createConnection({
+var pool = mysql.createPool({
   host:'localhost',
   user:'root',
   password:'root',
@@ -17,11 +17,11 @@ var connection = mysql.createConnection({
 });
 
 //Open mysql connection
-connection.connect(function(err){
+pool.getConnection(function(err){
   if(!err) {
-      console.log("Database is connected ... nn");    
+      console.log("Database is connected ... ");    
   } else {
-      console.log("Error connecting database ... nn");    
+      console.log("Error connecting database ... ");    
   }
 });
 
@@ -48,18 +48,38 @@ app.use(session({
 
 // index.html
 app.get('/', function(req, res) {
-  connection.query('SELECT * from test', function(err, rows, fields) {
-  connection.end();
-    if (!err) {
-      console.log('data: ', rows);
-      res.render('pages/index', {data : rows});
-    }
-    else {
-      console.log('Error while performing Query.');
-    }
+
+  pool.getConnection(function(err, connection) {
+    // Use the connection
+    connection.query( 'SELECT * from service', function(err, rows) {
+      // And done with the connection.
+      connection.release();
+      // Don't use the connection here, it has been returned to the pool.
+      if (!err) {
+        console.log('data: ', rows);
+        res.render('pages/index', {data : rows});
+      }
+      else {
+        console.log('Error is: ', err);
+      }
+    });
   });
   
 });
+
+app.get('/login', function (req, res) {
+  
+  res.render('pages/login');
+});
+
+app.post('/login', function (req, res) {
+  
+});
+
+app.get('/register', function (req, res) {
+  res.render('pages/register');
+});
+
 
 
 function json_false (res, msg) {
