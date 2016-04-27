@@ -101,3 +101,8 @@ app.get('/service/create', function (req, res) {
 
   res.render('pages/service_create');
 });
+
+app.get('/request/create', function (req, res) {
+
+  res.render('pages/request_create');
+});
