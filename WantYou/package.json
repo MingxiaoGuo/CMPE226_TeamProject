@@ -12,7 +12,11 @@
     "ejs": "2.3.3",
     "express": "4.13.3",
     "express-session": "^1.9.1",
-    "mysql": "^2.10.2"
+    "mysql": "^2.10.2",
+    "cookie-parser":"*",
+    "request":"*",
+    "mysql":"*",
+    "http":"*"
   },
   "engines": {
     "node": "0.12.7"
