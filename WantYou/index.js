@@ -12,16 +12,17 @@ var mysql = require("mysql");
 var pool = mysql.createPool({
   host:'localhost',
   user:'root',
-  password:'root',
-  database:'CMPE226'
+  password:'',
+  database:'wantYou'
 });
 
 //Open mysql connection
 pool.getConnection(function(err){
   if(!err) {
-      console.log("Database is connected ... ");    
+    console.log("Database is connected ... ");    
   } else {
-      console.log("Error connecting database ... ");    
+    console.log(err)
+    console.log("Error connecting database ... ");    
   }
 });
 
