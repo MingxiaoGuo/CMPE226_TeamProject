@@ -25,6 +25,17 @@ button.green {
 	min-width: 90px;
 }
 
+button.lggreen {
+    background-color: #1abc9c;  
+    box-shadow: inset 0 1px 0 0 #48b9c7;
+    color: #fff;
+    border:2px solid #1abc9c;
+    text-shadow: 1px 1px 1px #000;  
+    font-size:18px;
+    padding: 5px 5px;
+    min-width: 160px;
+}
+
 .jumbotron {
     position: relative;
     width: 100%;
