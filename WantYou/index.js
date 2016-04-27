@@ -96,3 +96,8 @@ function json_true (res, data) {
 app.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));
 });
+
+app.get('/service/create', function (req, res) {
+
+  res.render('pages/service_create');
+});
