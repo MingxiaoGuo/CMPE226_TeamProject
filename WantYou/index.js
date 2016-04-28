@@ -49,32 +49,38 @@ app.use(session({
 
 // index.html
 app.get('/', function(req, res) {
-
-  pool.getConnection(function(err, connection) {
-    // Use the connection
-    connection.query( 'SELECT * from service', function(err, rows) {
-      // And done with the connection.
-      connection.release();
-      // Don't use the connection here, it has been returned to the pool.
-      if (!err) {
-        console.log('data: ', rows);
-        res.render('pages/index', {data : rows});
-      }
-      else {
-        console.log('Error is: ', err);
-      }
-    });
-  });
+  if (req.session.user) {
+    res.render('pages/index', {MemberInfo : req.session.user});
+  } else {
+    res.render('pages/index');
+  }
   
 });
 
 app.get('/login', function (req, res) {
-  
   res.render('pages/login');
 });
 
 app.post('/login', function (req, res) {
-  
+  var loginData = req.body;
+  var query = "select user_id, fname from user where email='" + loginData.email + "' and pwd='" + loginData.password + "';";
+  console.log(query);
+  pool.getConnection(function (err, connection) {
+    connection.query(query, function (err, rows) {
+      connection.release();
+      if (!err) {
+        req.session.user = {
+          userId : rows[0].user_id,
+          fname : rows[0].fname
+        };
+        res.json({result : true, msg : req.session.user});
+      } else {
+        console.log('Error is : ', err);
+        res.json({result : false, msg : "login fail!"});
+      }
+    });
+  });
+
 });
 
 app.get('/register', function (req, res) {

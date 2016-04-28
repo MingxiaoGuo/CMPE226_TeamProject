@@ -11,8 +11,8 @@
     <ul class="nav navbar-nav navbar-right">
       <li>
         <% if(typeof(MemberInfo) != 'undefined') { %>
-          <a href="/profile"><span class="glyphicon glyphicon-user"></span> <%= MemberInfo.username %></a>
-          <a href="/cart"><span class="glyphicon glyphicon-shopping-cart"> Service </span></a>
+          <a href="/profile"><span class="glyphicon glyphicon-user"></span> <%= MemberInfo.fname %></a>
+          
         <%  } else {%>
           <div>
           <a href="/register"><button type="button" class="btn green-Sign ">Sign Up</button></a>
