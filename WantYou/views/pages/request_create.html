@@ -22,26 +22,21 @@
                         <label for="title" class="col-md-3 control-label">Title</label>
 
                         <div class="col-md-9">
-                            <input type="text" class="form-control" name="title" placeholder="Title">
+                            <input type="text" class="form-control" id="title" name="title" placeholder="Title">
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="catagory" class="col-md-3 control-label">Catagory</label>
+                        <label for="category" class="col-md-3 control-label">Catagory</label>
 
                         <div class="col-md-3 dropdown">
-                            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
-                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                                Tutoring
-                                <span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-                                <li><a href="#">Tutoring</a></li>
-                                <li><a href="#">Computer</a></li>
-                                <li><a href="#">Automotive</a></li>
-                                <li><a href="#">Financial</a></li>
-                                <li><a href="#">Household</a></li>
-                            </ul>
+                            <select class="form-control" id="category">
+                                <option>Tutoring</option>
+                                <option>Computer</option>
+                                <option>Automotive</option>
+                                <option>Financial</option>
+                                <option>Household</option>
+                            </select>
                         </div>
                     </div>
 
@@ -49,8 +44,7 @@
                         <label for="description" class="col-md-3 control-label">Description</label>
 
                         <div class="col-md-9">
-                            <textarea class="form-control" rows="4" name="description"
-                                      placeholder="Description"></textarea>
+                            <textarea class="form-control" rows="4" id="description" placeholder="Description"></textarea>
                         </div>
                     </div>
 
@@ -58,15 +52,10 @@
                         <label for="city" class="col-md-3 control-label">City</label>
 
                         <div class="col-md-3 dropdown">
-                            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
-                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                                Santa Clara
-                                <span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-                                <li><a href="#">Santa Clara</a></li>
-                                <li><a href="#">San Jose</a></li>
-                            </ul>
+                            <select class="form-control" id="city">
+                                <option>Santa Clara</option>
+                                <option>San Jose</option>
+                            </select>
                         </div>
                     </div>
 
@@ -74,15 +63,10 @@
                         <label for="state" class="col-md-3 control-label">State</label>
 
                         <div class="col-md-3 dropdown">
-                            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu2"
-                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                                California
-                                <span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-                                <li><a href="#">California</a></li>
-                                <li><a href="#">Washington</a></li>
-                            </ul>
+                            <select class="form-control" id="state" name="state">
+                                <option>California</option>
+                                <option>Washington</option>
+                            </select>
                         </div>
                     </div>
 
@@ -98,6 +82,7 @@
                                 &nbsp Choose
                             </button>
                         </div>
+
                     </div>
 
                     <div class="form-group">
