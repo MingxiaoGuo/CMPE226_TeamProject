@@ -15,82 +15,76 @@
       </div>
     </div>
 
-    <!-- row 3  side navbar with service and request list-->
-    <div class= "row" name="ServiceRequest">
+    <!-- row 3  button to post service and request-->
+    <div class= "col-lg-4 col-lg-offset-8" name ="create">
+      <button id="createService" type="button" class="btn lggreen" style="margin-right:10px;">Create Service</button>
+      <button id="createService" type="button" class="btn lggreen" >Create Request</button>
+    </div> <!--end of row3-->
 
-      <aside class="col-lg-2" style="border-right: 1px solid #E4E4E4;margin-left:1em;">  <!-- side navbar -->
+    <!-- row 4  side navbar with service and request list-->
+    <div class= "row" name="ServiceRequest" >
+
+      <aside class="col-lg-2" style="border-right: 1px solid #E4E4E4;margin-left:20px; margin-top: -20px">  <!-- side navbar -->
+        <!-- TODO -->
         </br>
         <ul class="side-navbar nav nav-pills nav-stacked" >
-          <li class="active" style="font-weight: bold;"><a href="serviceList">Services </a></li>
+          <li class="active" style="font-weight: bold;"> <a href="" id="serviceList">Services </a></li>
         </br>
-          <li style="font-weight: bold;"><a href="requestList">Requests </a></li>          
+          <li style="font-weight: bold;"><a href="" id="requestList">Requests </a></li>          
         </ul> 
       </aside>
 
-      <article class="col-lg-9" style= "margin-left:1em;">
-        <div class="row " name = "location" >
+      <div class="container col-lg-9" style= "margin-left:20px; margin-top: -40px">
+        <div id="location" class="row " name = "location" >
               <br>
               <!-- TODO -->
               <!--  Location from the index page -->
           <h3>San Francisco</h4> </br>
         </div>
 
-        <div class="row" name="listResult" style="background-color:#fcfdfb;font-size:15px;">
-                        <!-- TODO -->
-              <!--  Query Service List-->
+         <!--  Query Service List-->
+        <table class="table table-striped" style= "margin-left:-20px; margin-top: -20px">
+            <thead>
+              <tr>
+                <th class="col-lg-1">Date</th>
+                <th class="col-lg-1">Category</th>
+                <th class="col-lg-8">Title</th>
+              </tr>
+            </thead>
 
-          <!-- mock data 1-->
-          <div class= "row" >
-              <div class="col-lg-1">
-                <p>Apr 26</p>
-              </div>
-              <div class="col-lg-1">
-                <p>Computer</p>
-              </div>
-              <div class="col-lg-9" style= "margin-left:1em;">
-                <a href="" >Professional eCommerce Android App Design and Development, Professional eCommerce Android App Design and Development</a>
-              </div>
-          </div>
+            <tbody>
+              <!-- mock data 1-->
+              <tr>
+                <td >Apr 26</td>
+                <td >Computer</td>
+                <td ><a href="">
+                Professional eCommerce Android App Design and Development, Professional eCommerce Android App Design and Development
+                </a></td>
+              </tr>
 
-          <!-- mock data 2-->
-          <div class= "row" >
-              <div class="col-lg-1">
-                <p>Apr 26</p>
-              </div>
-              <div class="col-lg-1">
-                <p>Finacial</p>
-              </div>
-              <div class="col-lg-9" style= "margin-left:1em;">
-                <a href="" >Angel Investor needed for innovative product</a>
-              </div>
-          </div>
+              <!-- mock data 1-->
+              <tr>
+                <td >Apr 26</td>
+                <td >Finacial</td>
+                <td ><a href="">
+                 Angel Investor needed for innovative product
+                </a></td>
+              </tr>
 
-          <!-- mock data 3-->
-          <div class= "row" >
-              <div class="col-lg-1">
-                <p>Apr 26</p>
-              </div>
-              <div class="col-lg-1">
-                <p>Automotive</p>
-              </div>
-              <div class="col-lg-9" style= "margin-left:1em;">
-                <a href="" >Toyota Master Technician</a>
-              </div>
-          </div>
-        </div>
-      </article>
-    </div> <!--end of row3 -->
+              <!-- mock data 3-->
+              <tr>
+                <td >Apr 26</td>
+                <td >Automotive</td>
+                <td ><a href="">
+                 Toyota Master Technician
+                </a></td>
+              </tr>
+            </tbody>
+        </table>
+      </div>
+    </div> <!--end of row4 -->
 
-    <!-- row 4  button to post service and request-->
-    <div class= "row text-center" name ="create" style="background-color:#f4f8ee;margin-left:1em;margin-right:1em;">
-      </br>
-      <h3> Share services in our growing community </h3>
-      </br>
 
-      <a href="/"><button type="button" class="btn lggreen" style="margin-bottom:1em;margin-right:0.6em;">Create Service</button></a>
-      <a href="/"><button type="button" class="btn lggreen" style="margin-bottom:1em;margin-left:0.6em;">Create Request</button></a>
-
-    </div> <!--end of row4-->
   </div> <!-- end container -->  
 
 
