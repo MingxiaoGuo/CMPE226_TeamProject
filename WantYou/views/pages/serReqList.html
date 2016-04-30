@@ -29,9 +29,9 @@
         <!-- TODO -->
         </br>
         <ul class="side-navbar nav nav-pills nav-stacked" >
-          <li class="active" style="font-weight: bold;"> <a href="" id="serviceList">Services </a></li>
+          <li class="active" style="font-weight: bold;"> <a href="/serviceList" id="serviceList">Services </a></li>
         </br>
-          <li style="font-weight: bold;"><a href="" id="requestList">Requests </a></li>          
+          <li style="font-weight: bold;"><a href="/requestList" id="requestList">Requests </a></li>          
         </ul> 
       </aside>
 
@@ -44,7 +44,7 @@
         </div>
 
          <!--  Query Service List-->
-        <table class="table table-striped" style= "margin-left:-20px; margin-top: -20px">
+        <table class="table table-striped" style= "margin-left:-20px; ">
             <thead>
               <tr>
                 <th class="col-lg-1">Date</th>
@@ -53,33 +53,17 @@
               </tr>
             </thead>
 
-            <tbody>
-              <!-- mock data 1-->
+            <tbody>           
+           <% for(var i = 0; i < data.length; i++) { 
+              var str = data[i].time.toString();
+              var date = str.substring(4,10);
+           %>   
               <tr>
-                <td >Apr 26</td>
-                <td ><a href="">Computer</td>
-                <td ><a href="">
-                Professional eCommerce Android App Design and Development, Professional eCommerce Android App Design and Development
-                </a></td>
+                <td ><%= date %></td>
+                <td ><a href=""><%= data[i].category_name %></a></td>
+                <td ><a href=""><%= data[i].title %></a></td>
               </tr>
-
-              <!-- mock data 1-->
-              <tr>
-                <td >Apr 26</td>
-                <td ><a href="">Finacial</td>
-                <td ><a href="">
-                 Angel Investor needed for innovative product
-                </a></td>
-              </tr>
-
-              <!-- mock data 3-->
-              <tr>
-                <td >Apr 26</td>
-                <td ><a href="">Automotive</td>
-                <td ><a href="">
-                 Toyota Master Technician
-                </a></td>
-              </tr>
+            <% } %>
             </tbody>
         </table>
       </div>

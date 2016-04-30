@@ -88,6 +88,28 @@ app.get('/register', function (req, res) {
 });
 
 
+//service list
+//select  city ="san francisco";
+//TODO, city name
+app.get('/serReqList', function (req, res) {
+  var cityName = "San Francisco";
+  var query = "select time, category_name, title from service as s, category as c " 
+  query = query + "where s.category_id = c.category_id and city ='" + cityName +"';";
+  console.log(query);      
+
+    pool.getConnection(function (err, connection) {
+      connection.query(query, function (err, rows) {
+        connection.release();
+         if (!err) {
+          res.render('pages/serReqList', {'data': rows});
+        } else {
+          console.log('Error is : ', err);
+          console.log('Error while performing Query.');
+        }
+      });
+    });
+});
+
 
 function json_false (res, msg) {
 	res.json({ result : false, msg : msg });
