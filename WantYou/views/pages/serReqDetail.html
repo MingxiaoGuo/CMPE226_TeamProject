@@ -40,15 +40,24 @@
           <div class="col-lg-1" id="category">Computer</div>
           <div class="col-lg-2" id="city">San Francisco</div>
           <div class="col-lg-2" id="avgRate" >rates need </div>
-          <div id="readReview"  class="col-lg-3"style="margin-left:-18px;">
-              <button id="readReview" type="button" class="btn smgreen"style="margin-right:8px;" >Read Reviews</button>     
-              <!--TODO --> 
+          <div id="readReview"  class="col-lg-6"style="margin-left:-18px;">
+              <button id="readReview" type="button" class="btn smgreen"style="margin-right:7px;" >Read Reviews</button>     
+        
               <!-- User need to signed in, can write reviews -->      
-              <button id="writeReview" type="button" class="btn smgreen" 
+              <button id="writeReview" type="button" class="btn smgreen"                
+                   <% if(typeof(MemberInfo) == 'undefined') { %>
+                      style="display: none;"
+                   <%  } else { %>
+                      style="margin-right:7px;"
+                   <% }/*end if(MemberInfo)*/%> 
+              > Write Reviews</button>
+              
+              <!-- User need to signed in, can add to favorite -->      
+              <button id="favorite" type="button" class="btn smgreen" 
                    <% if(typeof(MemberInfo) == 'undefined') { %>
                       style="display: none;"
                    <%  } /*end if(MemberInfo)*/%>
-              >Write Reviews</button>           
+              >Add to Favorite</button>        
           </div>
         </div> <!-- end of panel body1-->
 
@@ -78,8 +87,8 @@
       </div><!-- end of panel body3-->
     </div> <!--end of row4 -->
 
-
-      <% if(typeof(MemberInfo) != 'undefined') { %>
+      <!-- TODO change If condition -->
+      <% if(typeof(MemberInfo) == 'undefined') { %>
         <!-- row 5  write review-->
         <div class="container col-lg-12" >
           <div class="panel panel-default ">
