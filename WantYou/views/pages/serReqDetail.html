@@ -54,14 +54,14 @@
     <div class="container col-lg-12">
       <div class="panel panel-success">
         <div class="panel-heading">
-          Review
+          <h4>Review</h4>
         </div>
         <div class="panel-body">
           <table class="table">
             <thead class="warning">
               <tr>
                 <th class="col-lg-2 text-center">
-                  Person
+                  Customer
                 </th>
                 <th class="col-lg-8 text-left">
                   Review
@@ -100,8 +100,15 @@
         <!-- panel body for rate and review -->
         <div class="panel-body " style=" margin:0px; padding-left:12px; padding-top:4px; padding-bottom:5px;" >
           <form class="form">
-              <div class="form-group">
-                <label for="Rate">Rate</label>
+              <div class="form-group" style="margin-top: 10px">
+                <label for="rate">Rate</label>
+                <select class="selectpicker col-md-2" id="rate" data-style="btn-success">
+                      <option>1</option>
+                      <option>2</option>
+                      <option>3</option>
+                      <option>4</option>
+                      <option>5</option>
+                </select>
                 <!--TODO-->
                 <!-- Stars for rate-->
               </div>
@@ -110,7 +117,11 @@
                 <textarea id="review" class="form-control" rows="6" ></textarea>
               </div>
               <div class="text-center">
-                <button id="submitReview" type="button" class="btn smgreen text-center">Submit Your Rate And Review</button>
+              <% if(typeof(MemberInfo) != 'undefined') { %>
+                <button id="submitReview" uid="<%= MemberInfo.userId%>" sid="<%= data.service_id %>" type="button" class="btn smgreen text-center">Submit Your Rate And Review</button>
+              <% } else { %>
+                <a href="/login"><button type="button" class="btn smgreen text-center">Write After Login</button></a>
+              <% } %>
               </div>
           </form> <!--end of form -->
         </div> <!-- end of panel body1-->
@@ -132,7 +143,21 @@
     $('#writePanel').removeClass('hidden');
   });
   $('#submitReview').on('click', function () {
-    
+    var reviewData = {
+      user_id : $('#submitReview').attr('uid'),
+      service_id : $('#submitReview').attr('sid'),
+      comment : $('#review').val(),
+      rate : $('#rate option:selected').text()
+    };
+    console.log(reviewData)
+    $.post('/writereview', reviewData, function (res) {
+      if (res.result) {
+        alert("You've successfully review this service!");
+      } else {
+        alert("Error while creating review, please try again!");
+      }
+      window.location.reload();
+    })
   });
 });
 </script>

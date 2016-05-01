@@ -1,5 +1,3 @@
-insert into user values (1, 'Mingxiao', 'Guo', 'mg@sjsu.edu', '1234', 'male', date(now()), '408111222', '1st street', 'san jose', 'ca', '95110');
-insert into user values (10, 'annie', 'zhang', 'annie@sjsu.edu', 'annie', 'female', date(now()), '510-666-8888', 'Market Street', 'San Francisco','CA', '95110');
 
 insert into category values(null, 'Automotive', 'Automotive services');
 insert into category values(null, 'Computer', 'Computer services');
@@ -8,7 +6,8 @@ insert into category values(null, 'Household', 'Household services');
 insert into category values(null, 'Tutoring', 'Tutoring services');
 
 alter table service modify column title varchar(120) not null;
-
+alter table user modify column pwd varchar(200) not null;
+/*
 insert into service values(null, 'Professional eCommerce Android App Design and Development', 'video link', 'image link', 
 	'We are a professional E-commerce web design team, offering custom graphic design, Magento e-commerce solutions, 
 	responsive e-commerce design, SEO online marketing and more web services, to completely meet your business needs.
@@ -25,7 +24,19 @@ insert into service values(null, 'Angel Investor needed for innovative product',
 
 insert into service values(null, 'Toyota Master Technician', 'video link', 'image link', 
 	'Toyota Master Technician provide car service ', 
-    'San Francisco', 'CA', 10, date(now()), 1);
+    'San Francisco', 'CA', 10, date(now()), 1);*/
 
+SET SQL_SAFE_UPDATES = 0;
+delete from review;
+
+delete from user where fname='p';
+
+select s.service_id, s.title, s.time posttime, c.category_name, s.city, s.description, u.fname, u.phone, u.email, avg(rate) avgrate 
+from service as s, user as u, category as c, review as r 
+where s.category_id = c.category_id and u.user_id = s.user_id and r.service_id = s.service_id and s.service_id = 3;
 
 insert into favorite values (10,1);
+
+select fname, time, comment, rate from review as r, user as u where u.user_id = r.user_id;
+
+select u.fname, r.time, r.comment, r.rate from review as r, service as s, user as u where r.service_id = s.service_id and u.user_id = r.user_id and s.service_id= 3;

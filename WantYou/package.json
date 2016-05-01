@@ -8,15 +8,15 @@
   },
   "dependencies": {
     "async": "^2.0.0-rc.3",
+    "cookie-parser": "*",
     "cool-ascii-faces": "1.3.4",
     "ejs": "2.3.3",
     "express": "4.13.3",
     "express-session": "^1.9.1",
-    "mysql": "^2.10.2",
-    "cookie-parser":"*",
-    "request":"*",
-    "mysql":"*",
-    "http":"*"
+    "http": "*",
+    "mysql": "*",
+    "password-hash": "^1.2.2",
+    "request": "*"
   },
   "engines": {
     "node": "0.12.7"

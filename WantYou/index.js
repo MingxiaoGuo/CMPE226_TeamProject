@@ -15,6 +15,10 @@ var pool = mysql.createPool({
   password:'',
   database:'wantYou'
 });
+var passwordHash = require('password-hash');
+
+
+
 
 //Open mysql connection
 pool.getConnection(function(err){
@@ -49,6 +53,7 @@ app.use(session({
 
 // index.html
 app.get('/', function(req, res) {
+
   if (req.session.user) {
     res.render('pages/index', {MemberInfo : req.session.user});
   } else {
@@ -64,21 +69,27 @@ app.get('/login', function (req, res) {
 app.post('/login', function (req, res) {
   // get data from page's request
   var loginData = req.body;
-  var query = "select user_id, fname from user where email='" + loginData.email + "' and pwd='" + loginData.password + "';";
+  var query = "select user_id, fname, pwd from user where email='" + loginData.email + "';";
   console.log(query);
   pool.getConnection(function (err, connection) {
     connection.query(query, function (err, rows) {
       connection.release();
       if (!err) {
-        console.log(rows);
-        if (rows.length > 0) {
-          req.session.user = {
-            userId : rows[0].user_id,
-            fname : rows[0].fname
-          };
-          res.json({result : true, msg : req.session.user});
+
+        //console.log(rows);
+        if (rows.length > 0) {        
+          var dbpwd = rows[0].pwd;
+          if (passwordHash.verify(req.body.password, dbpwd)) {
+            req.session.user = {
+              userId : rows[0].user_id,
+              fname : rows[0].fname
+            };
+            res.json({result : true, msg : req.session.user});
+          } else {
+            res.json({result : false, msg : "wrong password"});
+          }
         } else {
-          res.json({result : false, msg : "email and password incorrect!"});
+          res.json({result : false, msg : "wrong email"});
         }
 
       } else {
@@ -111,7 +122,10 @@ app.post('/register', function(req, res) {
   } else {
     // confpwd doesn't exist in database, delete it before insert
     delete data.confpwd;
-    // 
+
+
+    data.pwd = passwordHash.generate(data.pwd);
+    console.log(data.pwd);
     pool.getConnection(function (err, connection) {
       var query = connection.query('INSERT INTO user SET ?', data, function(err, result) {
         //
@@ -322,7 +336,7 @@ app.post('/request_create', function (req, res) {
 //======= Get Detail ========
 app.get('/serReqDetail/:id', function (req, res) {
   var service_id = req.params.id;
-  var query = "select s.title, s.time posttime, c.category_name, s.city, s.description, u.fname, u.phone, u.email, r.comment, r.time commenttime, avg(rate) avgrate from service as s, user as u, category as c, review as r where s.category_id = c.category_id and u.user_id = s.user_id and r.service_id = s.service_id and s.service_id = " + service_id + ";";
+  var query = "select s.service_id, s.title, s.time posttime, c.category_name, s.city, s.description, u.fname, u.phone, u.email, r.comment, r.time commenttime, avg(rate) avgrate from service as s, user as u, category as c, review as r where s.category_id = c.category_id and u.user_id = s.user_id and r.service_id = s.service_id and s.service_id = " + service_id + ";";
   pool.getConnection(function (err, connection) {
     connection.query(query, function(err, rows) {
       connection.release();
@@ -338,7 +352,8 @@ app.get('/serReqDetail/:id', function (req, res) {
   });
 
   var getReviews = function (detailData) {
-    var reviewQuery = "select u.fname, r.time, r.comment, r.rate from review as r, service as s, user as u where r.service_id = s.service_id and u.user_id = s.user_id and s.service_id = " + service_id + ";";
+    var reviewQuery = "select u.fname, r.time, r.comment, r.rate from review as r, user as u where u.user_id = r.user_id and r.service_id = " + service_id + ";";
+    
     pool.getConnection(function (err, connection) {
       connection.query(reviewQuery, function(err, rows1) {
         connection.release();
@@ -346,7 +361,7 @@ app.get('/serReqDetail/:id', function (req, res) {
           console.log('db error is: ', err);
         } else {          
           
-          console.log('data: ', rows1[1].time)
+          console.log('data: ', detailData)
           //renderPage(data);
           if (req.session.user) {
             res.render('pages/serReqDetail', {data: detailData, reviews: rows1, MemberInfo: req.session.user});
@@ -358,9 +373,38 @@ app.get('/serReqDetail/:id', function (req, res) {
     });
 
   }
-  
 });
 
+app.post('/writereview', function (req, res) {
+  console.log('revew', req.body)
+  var today = new Date();
+  var currentTime = today.getFullYear() + '-' + (today.getMonth()+1) + '-' + today.getDate() + ' ' + today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
+  var reviewData = {
+    user_id : req.body.user_id,
+    service_id : req.body.service_id,
+    time : currentTime,
+    comment : req.body.comment,
+    rate : req.body.rate
+  };
+
+  console.log(reviewData);
+  
+  pool.getConnection(function (err, connection) {
+    connection.query('INSERT INTO review SET ?', reviewData,function(err, result) {
+      connection.release();
+      if (err) {
+        console.log('db error is: ', err);
+      } else {          
+        console.log(result)
+        if (result.affectedRows == 1) {
+          return json_true(res, "review done!");
+        } else {
+          return json_false(res, "error while creating review!");
+        }
+      }
+    });
+  });
+})
 
 function json_false (res, msg) {
 	res.json({ result : false, msg : msg });
