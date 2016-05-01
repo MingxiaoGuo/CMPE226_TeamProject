@@ -8,29 +8,32 @@
   <% include ../partials/nav.ejs %>
   <div class="container"  >   
     <!-- row 2  big background pic-->
-    <div class="row row-index" >
-      <div class="col-lg-12">
-          <div class="thumbnail">
-              <img src="images/sharing.jpg">
-          </div>
+    <div class="row" >
+      <div class="jumbotron sharing-bg-img" >
+      <div class="row">
+        </br></br></br></br></br>
+        <div class="col-xs-8 col-sm-8">
+        </div>
+        <div class="col-xs-4 col-sm-2 col-sm-offset-8">
+          <a href="/service_create"><button id="createService" type="button" class="btn green-Sign">Create Service</button></a>
+        </div>
+        <div class="col-xs-4 col-sm-1">
+          <a href="/request_create"><button type="button" style="margin-right: 0px;" class="btn green-Sign">Create Request</button></a>
+        </div>
+      </div>
+
       </div>
     </div>
 
-    <!-- row 3  button to post service and request-->
-    <div class= "col-lg-4 col-lg-offset-8" name ="create">
-      <button id="createService" type="button" class="btn lggreen" style="margin-right:10px;">Create Service</button>
-      <button id="createService" type="button" class="btn lggreen" >Create Request</button>
-    </div> <!--end of row3-->
-
     <!-- row 4  side navbar with service and request list-->
-    <div class= "row" name="ServiceRequest" >
+    <div class= "row" style="margin-top: 50px;" name="ServiceRequest">
 
-      <aside class="col-lg-2" style="border-right: 1px solid #E4E4E4;margin-left:20px; margin-top: -20px">  <!-- side navbar -->
+      <aside class="col-lg-2" style="border-right: 1px solid #E4E4E4;margin-left:20px;">  <!-- side navbar -->
         <!-- TODO -->
         </br>
         <ul class="side-navbar nav nav-pills nav-stacked" >
           <li class="active" style="font-weight: bold;"> <a href="/serviceList" id="serviceList">Services </a></li>
-        </br>
+          </br>
           <li style="font-weight: bold;"><a href="/requestList" id="requestList">Requests </a></li>          
         </ul> 
       </aside>
@@ -61,7 +64,7 @@
               <tr>
                 <td ><%= date %></td>
                 <td ><a href=""><%= data[i].category_name %></a></td>
-                <td ><a href=""><%= data[i].title %></a></td>
+                <td ><a href="/serReqDetail/<%= data[i].service_id%>"><%= data[i].title %></a></td>
               </tr>
             <% } %>
             </tbody>
@@ -78,3 +81,7 @@
   <% include ../partials/footer.ejs %>
 </html>
 
+<script type="text/javascript">
+
+
+</script>

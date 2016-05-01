@@ -4,116 +4,139 @@
     <% include ../partials/header.ejs %>
 </head>
 <body>
+<% include ../partials/nav.ejs %>
 <div class="container">
-    <div id="create_box" style="margin-top:50px;" class="mainbox col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
-        <div class="panel panel-info">
-            <div class="panel-heading">
-                <div class="panel-title">Create Request</div>
-            </div>
-            <div class="panel-body">
-                <form id="createForm" class="form-horizontal" role="form">
+  <div id="create_box" style="margin-top:50px;" class="mainbox col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+    <div class="panel panel-info">
+      <div class="panel-heading">
+          <div class="panel-title">Create Request</div>
+      </div>
+      <div class="panel-body">
+        <form id="createForm" class="form-horizontal" role="form">
 
-                    <div id="createAlert" style="display:none" class="alert alert-danger">
-                        <p>Error:</p>
-                        <span></span>
-                    </div>
+          <div id="createAlert" class="alert alert-danger hidden ">
+            <p id="errmsg"></p>
+            
+          </div>
 
-                    <div class="form-group">
-                        <label for="title" class="col-md-3 control-label">Title</label>
+          <div class="form-group">
+              <label for="title" class="col-md-3 control-label">Title</label>
 
-                        <div class="col-md-9">
-                            <input type="text" class="form-control" id="title" name="title" placeholder="Title">
-                        </div>
-                    </div>
+              <div class="col-md-9">
+                  <input type="text" class="form-control" id="title" name="title" placeholder="Title">
+              </div>
+          </div>
 
-                    <div class="form-group">
-                        <label for="category" class="col-md-3 control-label">Catagory</label>
+          <div class="form-group">
+              <label for="category" class="col-md-3 control-label">Catagory</label>
 
-                        <div class="col-md-3 dropdown">
-                            <select class="form-control" id="category">
-                                <option>Tutoring</option>
-                                <option>Computer</option>
-                                <option>Automotive</option>
-                                <option>Financial</option>
-                                <option>Household</option>
-                            </select>
-                        </div>
-                    </div>
+              <div class="col-md-3 dropdown">
+                <select class="selectpicker" id="category" data-style="btn-primary">
+                    <%for(var i = 0; i < cateData.length; i++) { %>
+                      <option cid="<%= cateData[i].category_id %>"><%= cateData[i]. category_name%></option>
+                    <% } %>
+                </select>
+              </div>
+          </div>
 
-                    <div class="form-group">
-                        <label for="description" class="col-md-3 control-label">Description</label>
+          <div class="form-group">
+              <label for="description" class="col-md-3 control-label">Description</label>
 
-                        <div class="col-md-9">
-                            <textarea class="form-control" rows="4" id="description" placeholder="Description"></textarea>
-                        </div>
-                    </div>
+              <div class="col-md-9">
+                  <textarea class="form-control" rows="4" id="description" placeholder="Description"></textarea>
+              </div>
+          </div>
 
-                    <div class="form-group">
-                        <label for="city" class="col-md-3 control-label">City</label>
+          <div class="form-group">
+              <label for="city" class="col-md-3 control-label">City</label>
 
-                        <div class="col-md-3 dropdown">
-                            <select class="form-control" id="city">
-                                <option>Santa Clara</option>
-                                <option>San Jose</option>
-                            </select>
-                        </div>
-                    </div>
+              <div class="col-md-4 dropdown">
+                  <select class="form-control" id="city">
+                      <option>San Francisco</option>
+                      <option>Los Angeles</option>
+                      <option>Seattle</option>
+                      <option>New York</option>
+                  </select>
+              </div>
+          </div>
 
-                    <div class="form-group">
-                        <label for="state" class="col-md-3 control-label">State</label>
+          <div class="form-group">
+              <label for="state" class="col-md-3 control-label">State</label>
 
-                        <div class="col-md-3 dropdown">
-                            <select class="form-control" id="state" name="state">
-                                <option>California</option>
-                                <option>Washington</option>
-                            </select>
-                        </div>
-                    </div>
+              <div class="col-md-4 dropdown">
+                  <select class="form-control" id="state" name="state">
+                      <option>California</option>
+                      <option>Washington</option>
+                      <option>New York</option>
+                  </select>
+              </div>
+          </div>
 
-                    <div class="form-group">
-                        <label for="image" class="col-md-3 control-label">Choose Image</label>
+          <div class="form-group">
+              <label for="image" class="col-md-3 control-label">Choose Image</label>
 
-                        <div class="col-md-6">
-                            <input id="image" type="file" class="file">
-                        </div>
-                        <!-- Button -->
-                        <div class="col-md-3">
-                            <button id="btn-image" type="button" class="btn btn-info"><i class="icon-hand-right"></i>
-                                &nbsp Upload
-                            </button>
-                        </div>
+              <div class="col-md-6">
+                  <input id="image" type="file" class="file">
+              </div>
+              <!-- Button -->
+              <div class="col-md-3">
+                  <button id="btn-image" type="button" class="btn btn-info">Upload
+                  </button>
+              </div>
 
-                    </div>
+          </div>
 
-                    <div class="form-group">
-                        <label for="video" class="col-md-3 control-label">Choose video</label>
+          <div class="form-group">
+              <label for="video" class="col-md-3 control-label">Choose video</label>
 
-                        <div class="col-md-6">
-                            <input id="video" type="file" class="file">
-                        </div>
-                        <!-- Button -->
-                        <div class="col-md-3">
-                            <button id="btn-video" type="button" class="btn btn-info"><i class="icon-hand-right"></i>
-                                &nbsp Upload
-                            </button>
-                        </div>
-                    </div>
+              <div class="col-md-6">
+                  <input id="video" type="file" class="file">
+              </div>
+              <!-- Button -->
+              <div class="col-md-3">
+                  <button id="btn-video" type="button" class="btn btn-info">Upload
+                  </button>
+              </div>
+          </div>
 
-                    <div class="form-group">
-                        <!-- Button -->
-                        <div class="col-md-offset-3 col-md-9">
-                            <button id="btn-create" type="button" class="btn btn-info"><i class="icon-hand-right"></i>
-                                &nbsp Create
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
+          <div class="form-group">
+              <!-- Button -->
+              <div class="col-md-offset-3 col-md-9">
+                  <button id="btn-create" type="button" class="btn btn-info">Create
+                  </button>
+              </div>
+          </div>
+        </form>
+      </div>
     </div>
+  </div>
 </div>
 
 
 </body>
 <% include ../partials/footer.ejs %>
 </html>
+
+<script type="text/javascript">
+;jQuery(function ($) {
+  $('#createAlert').addClass('hidden');
+  $('#btn-create').on('click', function () {
+    var data = {
+      title : $('#title').val(),
+      description : $('#description').val(),
+      city : $('#city option:selected').val(),
+      state : $('#state option:selected').val(),
+      category_id : $('#category option:selected').attr('cid')
+    };
+    $.post('/request_create', data, function (res) {
+      if (res.result) {
+        alert('Request is created!');
+        window.location.href = '/serReqList';
+      } else {
+        var err = res.msg;
+        $('#errmsg').empty().append(err).parents('#createAlert').removeClass('hidden');
+      }
+    });
+  });
+});
+</script>

@@ -15,7 +15,7 @@ CREATE TABLE `user` (
   `lname` varchar(45) DEFAULT NULL,
   `email` varchar(45) NOT NULL,
   `pwd` varchar(45) NOT NULL,
-  `gender` char(1) DEFAULT NULL,
+  `gender` varchar(10) DEFAULT NULL,
   `birthday` datetime DEFAULT NULL,
   `phone` varchar(45) DEFAULT NULL,
   `street` varchar(100) DEFAULT NULL,
@@ -38,7 +38,7 @@ CREATE TABLE `category` (
 
 CREATE TABLE `service` (
   `service_id` int(11) NOT NULL AUTO_INCREMENT,
-  `title` varchar(45) NOT NULL,
+  `title` varchar(120) NOT NULL,
   `video` varchar(45) DEFAULT NULL,
   `image` varchar(45) DEFAULT NULL,
   `description` varchar(1024) NOT NULL,
@@ -123,3 +123,7 @@ CREATE TABLE `favorite` (
   CONSTRAINT `f_favor_service` FOREIGN KEY (`service_id`) REFERENCES `service` (`service_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `f_favor_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+
+ALTER TABLE user MODIFY COLUMN `gender` varchar(10);

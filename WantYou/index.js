@@ -62,6 +62,7 @@ app.get('/login', function (req, res) {
 });
 
 app.post('/login', function (req, res) {
+  // get data from page's request
   var loginData = req.body;
   var query = "select user_id, fname from user where email='" + loginData.email + "' and pwd='" + loginData.password + "';";
   console.log(query);
@@ -69,11 +70,17 @@ app.post('/login', function (req, res) {
     connection.query(query, function (err, rows) {
       connection.release();
       if (!err) {
-        req.session.user = {
-          userId : rows[0].user_id,
-          fname : rows[0].fname
-        };
-        res.json({result : true, msg : req.session.user});
+        console.log(rows);
+        if (rows.length > 0) {
+          req.session.user = {
+            userId : rows[0].user_id,
+            fname : rows[0].fname
+          };
+          res.json({result : true, msg : req.session.user});
+        } else {
+          res.json({result : false, msg : "email and password incorrect!"});
+        }
+
       } else {
         console.log('Error is : ', err);
         res.json({result : false, msg : "login fail!"});
@@ -83,6 +90,7 @@ app.post('/login', function (req, res) {
 
 });
 
+//======= Register ========
 app.get('/register', function (req, res) {
   res.render('pages/register');
 });
@@ -127,22 +135,176 @@ app.post('/register', function(req, res) {
 //TODO, city name
 app.get('/serReqList', function (req, res) {
   var cityName = "San Francisco";
-  var query = "select time, category_name, title from service as s, category as c " 
+  var query = "select service_id, time, category_name, title from service as s, category as c " 
   query = query + "where s.category_id = c.category_id and city ='" + cityName +"';";
-  console.log(query);      
+  //console.log(query);      
 
-    pool.getConnection(function (err, connection) {
-      connection.query(query, function (err, rows) {
-        connection.release();
-         if (!err) {
-          res.render('pages/serReqList', {'data': rows});
-        } else {
-          console.log('Error is : ', err);
-          console.log('Error while performing Query.');
+  pool.getConnection(function (err, connection) {
+    connection.query(query, function (err, rows) {
+      connection.release();
+       if (!err) {
+        var servInfo = [];
+        for (let i = 0; i < rows.length; i++) {
+          servInfo.push({
+            service_id : rows[i].service_id,
+            time : rows[i].time,
+            category_name : rows[i].category_name,
+            title : rows[i].title
+          });
         }
-      });
+        //console.log(servInfo);
+        // add session check
+        if (req.session.user) {
+          res.render('pages/serReqList', {'data': servInfo, 'MemberInfo': req.session.user});
+        } else {
+          res.render('pages/serReqList', {'data': servInfo});
+        }
+        
+      } else {
+        console.log('Error is : ', err);
+        console.log('Error while performing Query.');
+      }
     });
+  });
 });
+
+//======= Create Service ========
+app.get('/service_create', function (req, res) {
+  var renderPage = function (data) {
+    if (req.session.user) {
+      res.render('pages/service_create', {cateData: data, MemberInfo:req.session.user});
+    } else {
+      res.redirect('/login');
+    }
+  }
+  pool.getConnection(function (err, connection) {
+    connection.query('SELECT * FROM category;', function(err, rows) {
+      connection.release();
+      if (err) {
+        console.log('db error is: ', err);
+
+      } else {          
+        var data = [];
+        for(let i = 0; i < rows.length; i++) {
+          data.push({
+            category_id: rows[i].category_id,
+            category_name: rows[i].category_name
+          });
+        }
+        console.log('data: ', data)
+        renderPage(data);
+      }
+    });
+  });
+});
+
+app.post('/service_create', function (req, res) {
+  var data = req.body;
+  var today = new Date();
+  var currentTime = today.getFullYear() + '-' + (today.getMonth()+1) + '-' + today.getDate() + ' ' + today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
+  var category_id = 0;
+  if (data.title == '' || data.description == '') {
+    return json_false(res, "Please enter valid data");
+  }
+
+  var service = {
+    title : data.title,
+    description : data.description,
+    state : data.state,
+    city : data.city,
+    time : currentTime,
+    category_id : data.category_id,
+    user_id : req.session.user.userId
+  };
+  console.log(service);
+  pool.getConnection(function (err, connection) {
+    var query = connection.query('INSERT INTO service SET ?', service, function(err, result) {
+      connection.release();
+      if (err) {
+        console.log('db error is: ', err);
+        res.json({result : false, msg : err});
+      } else {
+        if (result.affectedRows == 1) {
+          return json_true(res, "register done!");
+        }
+        console.log('result is: ', result.affectedRows);
+      }
+    });
+    //console.log(query);
+  });
+})
+
+//======= Create Request =========
+app.get('/request_create', function (req, res) {
+  var renderPage = function (data) {
+    if (req.session.user) {
+      res.render('pages/request_create', {cateData: data, MemberInfo:req.session.user});
+    } else {
+      res.redirect('/login');
+    }
+  }
+  pool.getConnection(function (err, connection) {
+    connection.query('SELECT * FROM category;', function(err, rows) {
+      connection.release();
+      if (err) {
+        console.log('db error is: ', err);
+
+      } else {          
+        var data = [];
+        for(let i = 0; i < rows.length; i++) {
+          data.push({
+            category_id: rows[i].category_id,
+            category_name: rows[i].category_name
+          });
+        }
+        //console.log('data: ', data)
+        renderPage(data);
+      }
+    });
+  });
+});
+
+app.post('/request_create', function (req, res) {
+  var data = req.body;
+  var today = new Date();
+  var currentTime = today.getFullYear() + '-' + (today.getMonth()+1) + '-' + today.getDate() + ' ' + today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
+  var category_id = 0;
+  if (data.title == '' || data.description == '') {
+    return json_false(res, "Please enter valid data");
+  }
+
+  var request = {
+    title : data.title,
+    description : data.description,
+    state : data.state,
+    city : data.city,
+    time : currentTime,
+    category_id : data.category_id,
+    user_id : req.session.user.userId
+  };
+  console.log(request);
+  pool.getConnection(function (err, connection) {
+    var query = connection.query('INSERT INTO request SET ?', request, function(err, result) {
+      connection.release();
+      if (err) {
+        console.log('db error is: ', err);
+        res.json({result : false, msg : err});
+      } else {
+        if (result.affectedRows == 1) {
+          return json_true(res, "register done!");
+        }
+        console.log('result is: ', result.affectedRows);
+      }
+    });
+    //console.log(query);
+  });
+})
+
+//======= Get Detail ========
+app.get('/serReqDetail/:id', function (req, res) {
+  console.log('req.params.id');
+});
+
 
 function json_false (res, msg) {
 	res.json({ result : false, msg : msg });
@@ -159,7 +321,6 @@ app.listen(app.get('port'), function() {
 });
 
 app.get('/service/create', function (req, res) {
-
   res.render('pages/service_create');
 });
 
