@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <% include ../partials/header.ejs %>
+</head>
+
+<body>
+  <% include ../partials/nav.ejs %>
+  <div class="container"  >   
+    <!-- row 2  tab-->
+    <div class="row" >
+        <!-- tab -->
+        <div class="col-lg-12" style="margin-top:15px; margin-left:10px;">
+            <ul class="nav nav-tabs nav-justified">
+                <li class="active"><a data-toggle="tab" href="#user">Users</a></li>
+                <li><a data-toggle="tab" href="#service">Services</a></li>
+                <li><a data-toggle="tab" href="#request">Requests</a></li>
+            </ul>
+            <div class="tab-content">
+                <!-- tab for Users -->
+                <div id="user" class="tab-pane fade in active">
+                    <table class="table table-striped" style="margin-bottom: 0px;">
+                        <thead>
+                          <tr>
+                              <div class="col-lg-8">
+                                  <th >ID</th>
+                                  <th >First Name</th>
+                                  <th >Last Name</th>
+                                  <th >Email</th>
+                                  <th > Gender</th>
+                                   <th >Birthday</th>
+                              <th >Phone</th>
+                              </div>             
+                              <th class="col-lg-3">Address</th>
+                              <th ></th>                              
+                              <th ></th>
+                          </tr>
+                        </thead>  
+                        <tbody>                                         
+                             <% for(var i = 0; i < data.length; i++) { 
+                                var str = data[i].birthday.toString();
+                                var bdate = str.substring(4,10);
+                                var address = data[i].street + ", "+ data[i].city +", " +data[i].state + " " +data[i].zip_code;
+                             %>   
+                              <tr>
+                                <td ><%= data[i].user_id %></td>
+                                <td ><%= data[i].fname %></td>
+                                <td ><%= data[i].lname %></td>
+                                <td ><%= data[i].email %></td>
+                                <td ><%= data[i].gender %></td>
+                                <td ><%= bdate %></td>
+                                <td ><%= data[i].phone %></td>
+                                <td ><%= address  %></td>
+                                <td class="text-right">
+                                    <button id="edit" type="button" class="btn sm" > Edit</button>
+                                </td>
+                                <td >
+                                    <button id="delete" type="button" class="btn sm"> Delete</button>
+                                </td>                       
+                              </tr>
+                             <% } %>
+                        </tbody>
+                    </table>
+                </div> <!-- end of tab drink-->
+
+
+                <div id="service" class="tab-pane fade">
+                    Vestibulum nec erat eu nulla rhoncus fringilla ut non neque. Vivamus nibh urna.
+                </div>
+                <div id="request" class="tab-pane fade">
+                    que. Vivamus nibh urna.
+                </div>
+            </div>
+        </div>  <!-- end of left side of menu tab -->
+
+    </div> <!-- end of row 2 -->
+
+  </div> <!-- end container -->  
+
+
+
+</body>
+  <% include ../partials/footer.ejs %>
+</html>
+
+<script type="text/javascript">
+
+
+</script>
