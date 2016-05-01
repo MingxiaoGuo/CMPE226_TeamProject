@@ -168,6 +168,25 @@ app.get('/serReqList', function (req, res) {
   });
 });
 
+// admin user list
+app.get('/admin', function (req, res) {
+  var query = "select * from user;" 
+  console.log(query);  
+
+    pool.getConnection(function (err, connection) {
+      connection.query(query, function (err, rows) {
+        connection.release();
+         if (!err) {
+          res.render('pages/admin', {'data': rows});
+        } else {
+          console.log('Error is : ', err);
+          console.log('Error while performing Query.');
+        }
+      });
+    });
+});
+
+
 //======= Create Service ========
 app.get('/service_create', function (req, res) {
   var renderPage = function (data) {
