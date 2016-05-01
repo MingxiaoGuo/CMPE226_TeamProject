@@ -302,7 +302,44 @@ app.post('/request_create', function (req, res) {
 
 //======= Get Detail ========
 app.get('/serReqDetail/:id', function (req, res) {
-  console.log('req.params.id');
+  var service_id = req.params.id;
+  var query = "select s.title, s.time posttime, c.category_name, s.city, s.description, u.fname, u.phone, u.email, r.comment, r.time commenttime, avg(rate) avgrate from service as s, user as u, category as c, review as r where s.category_id = c.category_id and u.user_id = s.user_id and r.service_id = s.service_id and s.service_id = " + service_id + ";";
+  pool.getConnection(function (err, connection) {
+    connection.query(query, function(err, rows) {
+      connection.release();
+      if (err) {
+        console.log('db error is: ', err);
+      } else {          
+        
+        //console.log('data: ', data)
+        //renderPage(data);
+        getReviews(rows[0]);
+      }
+    });
+  });
+
+  var getReviews = function (detailData) {
+    var reviewQuery = "select u.fname, r.time, r.comment, r.rate from review as r, service as s, user as u where r.service_id = s.service_id and u.user_id = s.user_id and s.service_id = " + service_id + ";";
+    pool.getConnection(function (err, connection) {
+      connection.query(reviewQuery, function(err, rows1) {
+        connection.release();
+        if (err) {
+          console.log('db error is: ', err);
+        } else {          
+          
+          console.log('data: ', rows1[1].time)
+          //renderPage(data);
+          if (req.session.user) {
+            res.render('pages/serReqDetail', {data: detailData, reviews: rows1, MemberInfo: req.session.user});
+          } else {
+            res.render('pages/serReqDetail', {data: detailData, reviews: rows1});
+          }
+        }
+      });
+    });
+
+  }
+  
 });
 
 
@@ -318,13 +355,4 @@ function json_true (res, data) {
 
 app.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));
-});
-
-app.get('/service/create', function (req, res) {
-  res.render('pages/service_create');
-});
-
-app.get('/request/create', function (req, res) {
-
-  res.render('pages/request_create');
 });

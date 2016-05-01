@@ -6,118 +6,116 @@
 
 <body>
   <% include ../partials/nav.ejs %>
-  <div class="container"  >   
-    <!-- row 2  big background pic-->
-    <div class="row row-index" >
-      <div class="col-lg-12">
-          <div class="thumbnail">
-              <img src="images/bg2.png">
-          </div>
-      </div>
-    </div>
-
-    <!-- row 3  button to post service and request-->
-    <div class="row">
-        <div class= "col-lg-offset-8 col-lg-4 " name ="create">
-          <button id="createService" type="button" class="btn lggreen" style="margin-right:10px;">Create Service</button>
-          <button id="createService" type="button" class="btn lggreen" >Create Request</button>
-        </div> 
-    </div><!--end of row3-->
+  <div class="container">
 
     <!-- row 4  service detail-->
     <div class="container col-lg-12" style="margin-top:15px; ">
-      <div class="panel panel-default ">
+      <div class="panel panel-success ">
         <div class="panel-heading">
             <!-- TODO -->
             <!-- Query from service detail -->
-            <h4 id="title" style="margin-top:0px; margin-bottom:0px;">Professional eCommerce Android App Design and Development, Professional eCommerce Android App Design and Development
-            </h4>
+            <%
+              var str = data.posttime.toString();
+              var date = str.substring(4,10);
+            %>
+            <h4 id="title" style="margin-top:0px; margin-bottom:0px;"><%= data.title%></h4>
         </div>
         <!-- panel body1 for time, location, category-->
         <div class="panel-body " style="background-color: #f5f5f5; margin:0px; padding-left:12px;
           padding-top:4px; padding-bottom:5px;" >
-          <div class="col-lg-1" id="time"  style="margin-left:-9px;">Apr 26 </div>
-          <div class="col-lg-1" id="category">Computer</div>
-          <div class="col-lg-2" id="city">San Francisco</div>
-          <div class="col-lg-2" id="avgRate" >rates need </div>
-          <div id="readReview"  class="col-lg-6"style="margin-left:-18px;">
-              <button id="readReview" type="button" class="btn smgreen"style="margin-right:7px;" >Read Reviews</button>     
-        
-              <!-- User need to signed in, can write reviews -->      
-              <button id="writeReview" type="button" class="btn smgreen"                
-                   <% if(typeof(MemberInfo) == 'undefined') { %>
-                      style="display: none;"
-                   <%  } else { %>
-                      style="margin-right:7px;"
-                   <% }/*end if(MemberInfo)*/%> 
-              > Write Reviews</button>
-              
-              <!-- User need to signed in, can add to favorite -->      
-              <button id="favorite" type="button" class="btn smgreen" 
-                   <% if(typeof(MemberInfo) == 'undefined') { %>
-                      style="display: none;"
-                   <%  } /*end if(MemberInfo)*/%>
-              >Add to Favorite</button>        
-          </div>
+          <div class="col-lg-1" id="time"  style="margin-left:-9px;"><%= date%></div>
+          <div class="col-lg-1" id="category"><%= data.category%></div>
+          <div class="col-lg-2" id="city"><%= data.city%></div>
+          <div class="col-lg-2" id="avgRate" ><%= data.avgrate%></div>
+ 
         </div> <!-- end of panel body1-->
 
         <!-- panel body2 forservice description -->
-        <div id="description" class="panel-body">
-            <p>We are a professional E-commerce web design team, offering custom graphic design, Magento e-commerce solutions, responsive e-commerce design, SEO online marketing and more web services, to completely meet your business needs.</p>
-            <p>Support and development for Magento Community</p>
-            <p>Magento setup and installation</p>
-            <p>Implementation of Magento templates</p>
-            <p>Magento template customization</p> 
-        </div> <!-- end of panel body1-->
+        <div id="description" class="panel-body"><%= data.description%></div> <!-- end of panel body1-->
 
         <!--panel body3 for contact-->
-        <% if(typeof(MemberInfo) != 'undefined') { %>
           <!-- TODO -->
+          <%if(typeof(MemberInfo) != 'undefined') { %>
           <div id="contact"class="panel-body " style="margin-top:-20px;" >
-             <label>Name: </label> <span id="name" style="margin-right:20px;margin-left:10px;"> Annie</span>
-             <label>Phone: </label> <span id="phone" style="margin-right:20px;"> 510-555-6666</span>
-             <label>Email: </label> <span id="email" style="margin-right:20px;"> annie@gmail.com</span>
+             <label>Name: </label> <span id="name" style="margin-right:20px;margin-left:10px;"><%= data.fname%></span>
+             <label>Phone: </label> <span id="phone" style="margin-right:20px;"><%= data.phone%></span>
+             <label>Email: </label> <span id="email" style="margin-right:20px;"><%= data.email%></span>
           </div>
-          
-        <%  } else {%>
+          <% } %>
+          <%if(typeof(MemberInfo) == 'undefined') { %>
           <div id="contact"class="panel-body text-center" style="margin-top:-20px;" >
-             <button id="signIn" type="button" class="btn smgreen" >Sign In To Show Contact Info And Write Your Review</button>      
+          <a href="/login"><button type="button" class="btn smgreen" href="/login">Sign In To Show Contact Info And Write Your Review</button></a>
+                   
           </div>
-        <% } /*end if(MemberInfo)*/%>
+          <% } %>
       </div><!-- end of panel body3-->
     </div> <!--end of row4 -->
 
-      <!-- TODO change If condition -->
-      <% if(typeof(MemberInfo) == 'undefined') { %>
-        <!-- row 5  write review-->
-        <div class="container col-lg-12" >
-          <div class="panel panel-default ">
-            <div class="panel-heading">
-                <h4 id="title" style="margin-top:0px; margin-bottom:0px;">Write Your Review
-                </h4>
-            </div>
+    <div class="container col-lg-12">
+      <div class="panel panel-success">
+        <div class="panel-heading">
+          Review
+        </div>
+        <div class="panel-body">
+          <table class="table">
+            <thead class="warning">
+              <tr>
+                <th class="col-lg-2 text-center">
+                  Person
+                </th>
+                <th class="col-lg-8 text-left">
+                  Review
+                </th>
+                <th class="col-lg-2 text-center">
+                  Rate
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+            <% for(var i = 0; i < reviews.length; i++) { %>
+              <tr>
+              
+                <td class="col-lg-2 text-center"><%= reviews[i].fname%></td>
+                <td class="col-lg-8 text-left"><%= reviews[i].comment%></td>
+                <td class="col-lg-2 text-center"><%= reviews[i].rate%></td>
+              
+              </tr>
+            <% } %>
+            </tbody>
+          </table>
+          <!--1. 没登录不显示   2. 写过了不显示-->
+          <button id="writeReview" type="button" class="btn smgreen col-md-2 col-md-offset-9"> Write Reviews</button>
+        </div>
+      </div>
+    </div>
 
-            <!-- panel body for rate and review -->
-            <div class="panel-body " style=" margin:0px; padding-left:12px;
-              padding-top:4px; padding-bottom:5px;" >
-              <form class="form">
-                  <div class="form-group">
-                    <label for="Rate">Rate</label>
-                    <!--TODO-->
-                    <!-- Stars for rate-->
-                  </div>
-                  <div class="form-group">
-                    <label for="review">Review:</label>
-                    <textarea id="review" class="form-control" rows="6" ></textarea>
-                  </div>
-                  <div class="text-center">
-                    <button id="submitReview" type="button" class="btn smgreen text-center">Submit Your Rate And Review</button>
-                  </div>
-              </form> <!--end of form -->
-            </div> <!-- end of panel body1-->
-          </div>
-        </div> <!--end of row5-->
-      <%  } /*end if(MemberInfo)*/%>
+        <!-- row 5  write review-->
+    <div id="writePanel" class="container col-lg-12" >
+      <div class="panel panel-warning ">
+        <div class="panel-heading">
+            <h4 id="title" style="margin-top:0px; margin-bottom:0px;">Write Your Review
+            </h4>
+        </div>
+
+        <!-- panel body for rate and review -->
+        <div class="panel-body " style=" margin:0px; padding-left:12px; padding-top:4px; padding-bottom:5px;" >
+          <form class="form">
+              <div class="form-group">
+                <label for="Rate">Rate</label>
+                <!--TODO-->
+                <!-- Stars for rate-->
+              </div>
+              <div class="form-group">
+                <label for="review">Review:</label>
+                <textarea id="review" class="form-control" rows="6" ></textarea>
+              </div>
+              <div class="text-center">
+                <button id="submitReview" type="button" class="btn smgreen text-center">Submit Your Rate And Review</button>
+              </div>
+          </form> <!--end of form -->
+        </div> <!-- end of panel body1-->
+      </div>
+    </div> <!--end of row5-->
 
   </div> <!-- end container -->  
 
@@ -127,3 +125,14 @@
   <% include ../partials/footer.ejs %>
 </html>
 
+<script type="text/javascript">
+;jQuery(function ($) {
+  $('#writePanel').addClass('hidden');
+  $('#writeReview').on('click', function () {
+    $('#writePanel').removeClass('hidden');
+  });
+  $('#submitReview').on('click', function () {
+    
+  });
+});
+</script>
