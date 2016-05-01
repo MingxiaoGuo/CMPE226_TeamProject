@@ -87,7 +87,40 @@ app.get('/register', function (req, res) {
   res.render('pages/register');
 });
 
-
+app.post('/register', function(req, res) {
+  var data = req.body;
+  // check data integrity
+  if (data.fname == '' || data.lname == '' || data.email == '' 
+    || data.pwd == '' || data.confpwd == '' || data.gender == '') {
+    // if any required field is empty, return error to page
+    return json_false(res, "Please input valid data");
+  } else  if (!data.email.match(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/)) {
+    // if email field does not match email format, return error to page
+    return json_false(res, "Please input valid email");
+  } else if (data.pwd != data.confpwd) {
+    // if two passwords don't match, return error to page
+    return json_false(res, "password don't match");
+  } else {
+    // confpwd doesn't exist in database, delete it before insert
+    delete data.confpwd;
+    // 
+    pool.getConnection(function (err, connection) {
+      var query = connection.query('INSERT INTO user SET ?', data, function(err, result) {
+        //
+        connection.release();
+        if (err) {
+          console.log('db error is: ', err);
+        } else {
+          if (result.affectedRows == 1) {
+            return json_true(res, "register done!");
+          }
+          console.log('result is: ', result.affectedRows);
+        }
+      });
+      //console.log(query);
+    });
+  }
+})
 
 function json_false (res, msg) {
 	res.json({ result : false, msg : msg });
