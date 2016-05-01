@@ -28,4 +28,4 @@ insert into service values(null, 'Toyota Master Technician', 'video link', 'imag
     'San Francisco', 'CA', 10, date(now()), 1);
 
 
-insert into favorite values (10,10);
+insert into favorite values (10,1);
