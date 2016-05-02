@@ -69,8 +69,17 @@ app.get('/login', function (req, res) {
 app.post('/login', function (req, res) {
   // get data from page's request
   var loginData = req.body;
+  if (req.body.email == 'admin') {
+    var adminHashed = passwordHash.generate('admin');
+    if (passwordHash.verify(req.body.password, adminHashed)) {
+      console.log('123')
+      res.json({result : true, msg : 'admin'});
+      return;
+    }
+  }
+
   var query = "select user_id, fname, pwd from user where email='" + loginData.email + "';";
-  console.log(query);
+  //console.log(query);
   pool.getConnection(function (err, connection) {
     connection.query(query, function (err, rows) {
       connection.release();
@@ -280,22 +289,142 @@ app.get('/serReqList', function (req, res) {
 
 // admin user list
 app.get('/admin', function (req, res) {
+  req.session.user = {fname:'admin', userId:'-1'};
   var query = "select * from user;" 
-  console.log(query);  
+  //console.log(query);  
 
+  pool.getConnection(function (err, connection) {
+    connection.query(query, function (err, rows) {
+      connection.release();
+      
+      var userInfo = [];
+      for(let i = 0; i < rows.length; i++) {
+        userInfo.push({
+          user_id: rows[i].user_id,
+          fname: rows[i].fname,
+          lname: rows[i].lname,
+          email: rows[i].email,
+          pwd: rows[i].pwd,
+          gender: rows[i].gender,
+          birthday: rows[i].birthday,
+          phone: rows[i].phone,
+          street: rows[i].street,
+          city: rows[i].city,
+          state: rows[i].state,
+          zip_code: rows[i].zip_code
+        });
+      }
+
+      if (!err) {
+        //console.log('userInfo');
+        getServInfo(userInfo);
+        //res.render('pages/admin', {userData : userInfo});
+      } else {
+        console.log('Error is : ', err);
+        console.log('Error while performing Query.');
+      }
+    });
+  });
+
+  var getServInfo = function (userInfo) {
+    var servInfo = [];
+    var servQuery = "SELECT * FROM service";
     pool.getConnection(function (err, connection) {
-      connection.query(query, function (err, rows) {
+      connection.query(servQuery, function (err, rows) {
         connection.release();
-         if (!err) {
-          res.render('pages/admin', {'data': rows});
+        console.log(rows);
+        if (!err) {
+          for (let i = 0; i < rows.length; i++) {
+            servInfo.push({
+              service_id: rows[i].service_id,
+              title: rows[i].title,
+              video: rows[i].video,
+              image: rows[i].image,
+              description: rows[i].description,
+              city: rows[i].city,
+              state: rows[i].state,
+              user_id: rows[i].user_id,
+              time: rows[i].time,
+              category_id: rows[i].category_id
+            });
+          }
+          res.render('pages/admin', {userData : userInfo, servData : servInfo, MemberInfo : req.session.user});
         } else {
           console.log('Error is : ', err);
-          console.log('Error while performing Query.');
         }
-      });
-    });
+      })
+    })
+  }
 });
 
+app.get('/edituser/:id', function (req, res) {
+  //console.log('id: ',req.params.id)
+  //res.render('pages/edituser')
+  var query = "select * from user where user_id = " + req.params.id + ";";
+  pool.getConnection(function (err, connection) {
+    if (!err) {
+      connection.query(query, function (err, result) {
+        connection.release();
+        if (!err) {
+          //这里没有转换，因为只有一条数据，直接读取就可以了a
+          var userData = result[0];
+          console.log('in edit user: ', userData);
+          res.render('pages/edituser', {data:userData})
+        }
+      });      
+    } else {
+      console.log('connection error while fetching user info: ', err);
+    }
+
+  });
+});
+
+app.post('/edituser', function (req, res) {
+  //console.log(req.body)
+  var userData = req.body;
+  var query = pool.getConnection(function (err, connection) {
+    if (!err) {
+      connection.query('update user set ? where user_id = ' + req.body.user_id, userData, function (err, result) {
+        connection.release();
+        if (!err) {
+          //console.log(result);
+          if (result.affectedRows == 1) {
+            json_true(res, "Update done!");
+          } else {
+            json_false(res, "Update fail!");
+          }
+        } else {
+          console.log('Error: ', err);
+          json_false(res, "Update fail!");
+        }
+      });
+    } else {
+      console.log('Connection Error: ', err);
+      json_false(res, "Update fail!");
+    }
+  });
+  console.log(query);
+});
+
+app.post('/removeuser', function (req, res) {
+  console.log(req.body);
+  var query = "delete from user where user_id=" + req.body.user_id + ";";
+  pool.getConnection(function (err, connection) {
+    connection.query(query, function (err, result) {
+      connection.release();
+      if (!err) {
+        if (result.affectedRows == 1) {
+          res.json({result : true, msg : "Delete Done!"});
+        } else {
+          res.json({result : false, msg : "Delete Fail!"});
+        }
+      } else {
+        console.log(err);
+        res.json({result : false, msg : "Delete Fail!"});
+      }
+    });
+  });
+});
 
 //======= Create Service ========
 app.get('/service_create', function (req, res) {
@@ -354,14 +483,15 @@ app.post('/service_create', function (req, res) {
         res.json({result : false, msg : err});
       } else {
         if (result.affectedRows == 1) {
-          return json_true(res, "register done!");
+          json_true(res, "register done!");
+          return;
         }
         console.log('result is: ', result.affectedRows);
       }
     });
     //console.log(query);
   });
-})
+});
 
 //======= Create Request =========
 app.get('/request_create', function (req, res) {

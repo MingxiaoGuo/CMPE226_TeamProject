@@ -57,7 +57,11 @@
       if (typeof res === undefined) {
         window.location.reload();
       } else if (res.result == true) {
-        window.location.href = '/';
+        if (res.msg == 'admin') {
+          window.location.href = '/admin';
+        } else {
+          window.location.href = '/';          
+        }
       } else {
         alert(res.msg);
       }

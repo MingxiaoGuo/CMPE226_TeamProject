@@ -19,54 +19,81 @@
             <div class="tab-content">
                 <!-- tab for Users -->
                 <div id="user" class="tab-pane fade in active">
-                    <table class="table table-striped" style="margin-bottom: 0px;">
+                  <table class="table table-striped" style="margin-bottom: 0px;">
                         <thead>
                           <tr>
                               <div class="col-lg-8">
-                                  <th >ID</th>
                                   <th >First Name</th>
                                   <th >Last Name</th>
                                   <th >Email</th>
-                                  <th > Gender</th>
-                                   <th >Birthday</th>
-                              <th >Phone</th>
+                                  <th >Gender</th>
+                                  <th >Birthday</th>
+                                  <th >Phone</th>
+                                  <th >Street</th>
+                                  <th >City</th>
+                                  <th >State</th>
+                                  <th >Zip Code</th>
                               </div>             
-                              <th class="col-lg-3">Address</th>
-                              <th ></th>                              
-                              <th ></th>
                           </tr>
                         </thead>  
-                        <tbody>                                         
-                             <% for(var i = 0; i < data.length; i++) { 
-                                var str = data[i].birthday.toString();
-                                var bdate = str.substring(4,10);
-                                var address = data[i].street + ", "+ data[i].city +", " +data[i].state + " " +data[i].zip_code;
-                             %>   
+                        <tbody>
+                          <% for(var i = 0; i < userData.length; i++) { %>
                               <tr>
-                                <td ><%= data[i].user_id %></td>
-                                <td ><%= data[i].fname %></td>
-                                <td ><%= data[i].lname %></td>
-                                <td ><%= data[i].email %></td>
-                                <td ><%= data[i].gender %></td>
-                                <td ><%= bdate %></td>
-                                <td ><%= data[i].phone %></td>
-                                <td ><%= address  %></td>
+                                <td ><%= userData[i].fname %></td>
+                                <td ><%= userData[i].lname %></td>
+                                <td ><%= userData[i].email %></td>
+                                <td ><%= userData[i].gender %></td>
+                                <td ><%= userData[i].birthday %></td>
+                                <td ><%= userData[i].phone %></td>
+                                <td ><%= userData[i].street  %></td>
+                                <td ><%= userData[i].city  %></td>
+                                <td ><%= userData[i].state  %></td>
+                                <td ><%= userData[i].zip_code %></td>
                                 <td class="text-right">
-                                    <button id="edit" type="button" class="btn sm" > Edit</button>
+                                    <button type="button" uid="<%= userData[i].user_id%>" class="btn sm editUser"> Edit</button>
                                 </td>
                                 <td >
-                                    <button id="delete" type="button" class="btn sm"> Delete</button>
-                                </td>                       
+                                    <button type="button" uid="<%= userData[i].user_id%>" class="btn sm removeUser"> Delete</button>
+                                </td>
                               </tr>
-                             <% } %>
+                          <% } %>
                         </tbody>
-                    </table>
+                  </table>
                 </div> <!-- end of tab drink-->
 
-
                 <div id="service" class="tab-pane fade">
-                    Vestibulum nec erat eu nulla rhoncus fringilla ut non neque. Vivamus nibh urna.
+                    <table class="table table-striped">
+                      <thead>
+                        <tr>
+                          <th>title</th>
+                          <th>description</th>
+                          <th>city</th>
+                          <th>user_id</th>
+                          <th>time</th>
+                          <th>category_id</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                      <% for( var i = 0; i < servData.length; i++ ) { %>
+                        <tr>
+                          <td ><%= servData[i].title %></td>
+                          <td ><%= servData[i].description %></td>
+                          <td ><%= servData[i].city %></td>
+                          <td ><%= servData[i].user_id  %></td>
+                          <td ><%= servData[i].time  %></td>
+                          <td ><%= servData[i].category_id  %></td>
+                          <td class="text-right">
+                            <button type="button" sid="<%= servData[i].service_id%>" class="btn sm editService"> Edit</button>
+                          </td>
+                          <td >
+                            <button type="button" sid="<%= servData[i].service_id%>" class="btn sm removeService"> Delete</button>
+                          </td>
+                        </tr>
+                      <% } %>
+                      </tbody>
+                    </table>
                 </div>
+
                 <div id="request" class="tab-pane fade">
                     que. Vivamus nibh urna.
                 </div>
@@ -84,6 +111,25 @@
 </html>
 
 <script type="text/javascript">
-
+;jQuery(function ($) {
+  $('.editUser').on('click', function () {
+    window.location.href = '/edituser/' + $(this).attr('uid');
+  })
+  $('.removeUser').on('click', function () {
+    if (confirm('Are you sure you want to delete this user?')) {
+      //alert($(this).attr('uid'));
+      $.post('/removeuser', {user_id: $(this).attr('uid')}, function (res) {
+        if (res.result) {
+          alert(res.msg);
+          window.location.reload();
+        } else {
+          alert(res.msg);
+        }
+      });
+    } else {
+      // Do nothing
+    }
+  });
+});
 
 </script>
