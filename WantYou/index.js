@@ -144,6 +144,102 @@ app.post('/register', function(req, res) {
   }
 })
 
+// updateProfile
+app.get('/updateProfile', function(req,res){
+  if(!req.session.user) {
+    req.session.error = "Please signup or login first";
+    console.log("log in first");
+    res.render("pages/login", {title:'login', message: req.session.error});
+  }
+  var user = req.session.user;
+     
+  var queryAll = "select user.*,title, time, category_id from service, user, favorite where user.user_id = favorite.user_id And favorite.service_id = service.service_id And user.email = '"+ user +"';";
+  console.log(queryAll);
+
+      pool.getConnection(function (err, connection) {
+      connection.query(queryAll, function (err, rows) {
+        connection.release();
+         if (!err) {
+          if(rows.length > 0) 
+          { 
+            
+            res.render('pages/updateProfile', {'data': rows});
+          }
+          else {
+            var queryUser = "Select * from user where email = '"+ user +"';";
+            pool.getConnection(function (err, connection) {
+                connection.query(queryUser, function (err, rows) {
+                  connection.release();
+                  if (!err) {
+                    console.log(rows);
+                    
+                    res.render('pages/updateProfile', {'data': rows});
+                  } else {
+                    console.log('Error is : ', err);
+                    console.log('Error while performing Query user.');
+                  }
+                });
+          });
+        }
+        } else {
+          console.log('Error is : ', err);
+          console.log('Error while performing Query.');
+        }
+      });
+    });
+
+
+});
+
+
+app.post('/updateProfile', function (req, res) {
+      var user = req.session.user;
+      
+      var data = req.body;
+      var updatedItems = " gender = '"+ data.gender + "'" + ", city = '"+ data.city + "'" +
+          ",state = '"+ data.state + "'";
+      if(data.fname != ''){
+        updatedItems += ", fname = '" + data.fname +"'";
+      }
+      if(data.lname != ''){
+        updatedItems += ", lname = '" + data.lname+"'";
+      }
+      if(data.birthday != ''){
+        updatedItems += ", birthday = '" + data.birthday+"'";
+      }
+      if(data.phone != ''){
+        updatedItems += ", phone = '" + data.phone+"'";
+      }
+      if(data.street != ''){
+        updatedItems += ", street = '" + data.street+"'";
+      }
+      if(data.zip_code != ''){
+        updatedItems += ", zip_code = '" + data.zip_code+"'";
+      }
+      console.log("updatedItems= " + updatedItems);
+      var updateProfile = "update user set " + updatedItems + "where email = '" + user +"'";
+
+     console.log("Query is: " + updateProfile);
+            
+    pool.getConnection(function (err, connection) {
+      var query = connection.query(updateProfile, data, function(err, result) {
+        //
+        connection.release();
+        if (err) {
+          console.log('db error is: ', err);
+        } else {
+          if (result.affectedRows == 1) {
+            return json_true(res, "Update done!");
+          }
+          console.log('result is: ', result.affectedRows);
+        }
+      });
+      //console.log(query);
+    });
+
+});
+
+
 //service list
 //select  city ="san francisco";
 //TODO, city name
