@@ -7,6 +7,7 @@ insert into category values(null, 'Tutoring', 'Tutoring services');
 
 alter table service modify column title varchar(120) not null;
 alter table user modify column pwd varchar(200) not null;
+alter table user modify column birthday date;
 /*
 insert into service values(null, 'Professional eCommerce Android App Design and Development', 'video link', 'image link', 
 	'We are a professional E-commerce web design team, offering custom graphic design, Magento e-commerce solutions, 
@@ -28,14 +29,15 @@ insert into service values(null, 'Toyota Master Technician', 'video link', 'imag
 
 SET SQL_SAFE_UPDATES = 0;
 delete from review;
-
+select * from user;
 delete from user where fname='p';
-
+desc user;
 select s.service_id, s.title, s.time posttime, c.category_name, s.city, s.description, u.fname, u.phone, u.email, avg(rate) avgrate 
 from service as s, user as u, category as c, review as r 
 where s.category_id = c.category_id and u.user_id = s.user_id and r.service_id = s.service_id and s.service_id = 3;
 
 insert into favorite values (10,1);
+update user set birthday = date(now()) where user_id = 8
 
 select fname, time, comment, rate from review as r, user as u where u.user_id = r.user_id;
 
