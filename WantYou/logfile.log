@@ -1,0 +1,62 @@
+{"level":"info","message":"Database is connected ... ","timestamp":"2016-05-04T07:49:32.186Z"}
+{"level":"info","message":"Database is connected ... ","timestamp":"2016-05-04T07:50:20.487Z"}
+{"level":"info","message":"Database is connected ... ","timestamp":"2016-05-04T07:50:22.244Z"}
+{"level":"info","message":"Database is connected ... ","timestamp":"2016-05-04T07:50:30.326Z"}
+{"level":"info","message":"Database is connected ... ","timestamp":"2016-05-04T07:50:42.550Z"}
+{"level":"info","message":"Database is connected ... ","timestamp":"2016-05-04T07:51:35.921Z"}
+{"level":"info","message":"Database is connected ... ","timestamp":"2016-05-04T07:51:57.169Z"}
+{"level":"info","message":"Database is connected ... ","timestamp":"2016-05-04T07:52:07.149Z"}
+{"level":"info","message":"Database is connected ... ","timestamp":"2016-05-04T07:52:16.999Z"}
+{"level":"info","message":"Database is connected ... ","timestamp":"2016-05-04T07:52:28.675Z"}
+{"level":"info","message":"Database is connected ... ","timestamp":"2016-05-04T07:52:45.768Z"}
+{"level":"info","message":"Database is connected ... ","timestamp":"2016-05-04T07:52:57.630Z"}
+{"level":"info","message":"rendering login page","timestamp":"2016-05-04T07:53:03.480Z"}
+{"level":"info","message":"login process","timestamp":"2016-05-04T07:53:05.151Z"}
+{"level":"info","message":"admin logged in","timestamp":"2016-05-04T07:53:05.152Z"}
+{"level":"info","message":"Database is connected ... ","timestamp":"2016-05-04T07:53:42.450Z"}
+{"level":"info","message":"Database is connected ... ","timestamp":"2016-05-04T07:53:51.245Z"}
+{"level":"info","message":"usr logged out","timestamp":"2016-05-04T07:57:35.164Z"}
+{"level":"info","message":"rendering index page","timestamp":"2016-05-04T07:57:35.175Z"}
+{"level":"info","message":"rendering login page","timestamp":"2016-05-04T07:57:39.548Z"}
+{"level":"info","message":"login process","timestamp":"2016-05-04T07:57:41.037Z"}
+{"level":"info","message":"admin logged in","timestamp":"2016-05-04T07:57:41.038Z"}
+{"level":"info","message":"Database is connected ... ","timestamp":"2016-05-04T19:59:00.223Z"}
+{"level":"info","message":"rendering index page","timestamp":"2016-05-04T19:59:01.920Z"}
+{"level":"info","message":"rendering login page","timestamp":"2016-05-04T19:59:05.705Z"}
+{"level":"info","message":"login process","timestamp":"2016-05-04T19:59:11.735Z"}
+{"level":"info","message":"common user logged in","timestamp":"2016-05-04T19:59:11.746Z"}
+{"level":"info","message":"rendering index page","timestamp":"2016-05-04T19:59:11.753Z"}
+{"level":"info","message":"usr logged out","timestamp":"2016-05-04T19:59:25.176Z"}
+{"level":"info","message":"rendering index page","timestamp":"2016-05-04T19:59:25.192Z"}
+{"level":"info","message":"rendering login page","timestamp":"2016-05-04T19:59:26.259Z"}
+{"level":"info","message":"login process","timestamp":"2016-05-04T19:59:28.203Z"}
+{"level":"info","message":"admin logged in","timestamp":"2016-05-04T19:59:28.206Z"}
+{"level":"info","message":"Database is connected ... ","timestamp":"2016-05-04T19:59:59.312Z"}
+{"level":"info","message":"rendering index page","timestamp":"2016-05-04T20:00:06.122Z"}
+{"level":"info","message":"rendering login page","timestamp":"2016-05-04T20:00:08.630Z"}
+{"level":"info","message":"login process","timestamp":"2016-05-04T20:00:09.877Z"}
+{"level":"info","message":"admin logged in","timestamp":"2016-05-04T20:00:09.883Z"}
+{"level":"info","message":"usr logged out","timestamp":"2016-05-04T20:00:14.090Z"}
+{"level":"info","message":"rendering index page","timestamp":"2016-05-04T20:00:14.104Z"}
+{"level":"info","message":"rendering login page","timestamp":"2016-05-04T20:00:15.694Z"}
+{"level":"info","message":"login process","timestamp":"2016-05-04T20:00:18.828Z"}
+{"level":"info","message":"common user logged in","timestamp":"2016-05-04T20:00:18.835Z"}
+{"level":"info","message":"rendering index page","timestamp":"2016-05-04T20:00:18.844Z"}
+{"level":"info","message":"usr logged out","timestamp":"2016-05-04T20:00:31.325Z"}
+{"level":"info","message":"rendering index page","timestamp":"2016-05-04T20:00:31.331Z"}
+{"level":"info","message":"rendering login page","timestamp":"2016-05-04T20:00:32.682Z"}
+{"level":"info","message":"login process","timestamp":"2016-05-04T20:00:33.544Z"}
+{"level":"info","message":"admin logged in","timestamp":"2016-05-04T20:00:33.544Z"}
+{"level":"info","message":"rendering index page","timestamp":"2016-05-04T20:01:04.002Z"}
+{"level":"info","message":"Database is connected ... ","timestamp":"2016-05-04T20:02:36.182Z"}
+{"level":"info","message":"rendering index page","timestamp":"2016-05-04T20:02:43.528Z"}
+{"level":"info","message":"rendering login page","timestamp":"2016-05-04T20:02:45.141Z"}
+{"level":"info","message":"login process","timestamp":"2016-05-04T20:02:46.146Z"}
+{"level":"info","message":"admin logged in","timestamp":"2016-05-04T20:02:46.151Z"}
+{"level":"info","message":"rendering index page","timestamp":"2016-05-04T20:02:49.687Z"}
+{"level":"info","message":"usr logged out","timestamp":"2016-05-04T20:03:07.192Z"}
+{"level":"info","message":"rendering index page","timestamp":"2016-05-04T20:03:07.201Z"}
+{"level":"info","message":"rendering login page","timestamp":"2016-05-04T20:03:08.736Z"}
+{"level":"info","message":"login process","timestamp":"2016-05-04T20:03:12.517Z"}
+{"level":"info","message":"common user logged in","timestamp":"2016-05-04T20:03:12.519Z"}
+{"level":"info","message":"rendering index page","timestamp":"2016-05-04T20:03:12.532Z"}

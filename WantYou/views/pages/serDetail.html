@@ -14,19 +14,15 @@
         <div class="panel-heading">
             <!-- TODO -->
             <!-- Query from service detail -->
-            <%
-              var str = data.posttime.toString();
-              var date = str.substring(4,10);
-            %>
             <h4 id="title" style="margin-top:0px; margin-bottom:0px;"><%= data.title%></h4>
         </div>
         <!-- panel body1 for time, location, category-->
         <div class="panel-body " style="background-color: #f5f5f5; margin:0px; padding-left:12px;
           padding-top:4px; padding-bottom:5px;" >
-          <div class="col-lg-1" id="time"  style="margin-left:-9px;"><%= date%></div>
-          <div class="col-lg-1" id="category"><%= data.category%></div>
+          <div class="col-lg-2" id="time"  style="margin-left:-9px;"><%= data.posttime %></div>
+          <div class="col-lg-2" id="category"><%= data.category%></div>
           <div class="col-lg-2" id="city"><%= data.city%></div>
-          <div class="col-lg-2" id="avgRate" ><%= data.avgrate%></div>
+          <div class="col-lg-2" id="avgRate" >Rate: <%= data.avgrate%></div>
  
         </div> <!-- end of panel body1-->
 
@@ -35,7 +31,7 @@
 
         <!--panel body3 for contact-->
           <!-- TODO -->
-          <%if(typeof(MemberInfo) != 'undefined') { %>
+          <% if(typeof(MemberInfo) != 'undefined') { %>
           <div id="contact"class="panel-body " style="margin-top:-20px;" >
              <label>Name: </label> <span id="name" style="margin-right:20px;margin-left:10px;"><%= data.fname%></span>
              <label>Phone: </label> <span id="phone" style="margin-right:20px;"><%= data.phone%></span>

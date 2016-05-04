@@ -8,7 +8,9 @@ var app = express();
 var http = require('http');
 var async = require("async");
 var request = require("request");
+var moment = require('moment');
 var mysql = require("mysql");
+var winston = require('winston');
 var pool = mysql.createPool({
   host:'localhost',
   user:'root',
@@ -16,17 +18,23 @@ var pool = mysql.createPool({
   database:'wantYou'
 });
 var passwordHash = require('password-hash');
+var dateTimeFormat = 'YYYY-MM-DD HH:mm:ss';
+var dateFormat = 'YYYY-MM-DD';
 
-
-
+  var logger = new (winston.Logger)({
+    transports: [
+      new (winston.transports.Console)(),
+      new (winston.transports.File)({ filename: 'logfile.log' })
+    ]
+  });
 
 //Open mysql connection
 pool.getConnection(function(err){
   if(!err) {
-    console.log("Database is connected ... ");    
+    logger.info("Database is connected ... ");    
   } else {
-    console.log(err)
-    console.log("Error connecting database ... ");    
+    logger.warn(err)
+    logger.warn("Error connecting database ... ");    
   }
 });
 
@@ -53,7 +61,7 @@ app.use(session({
 
 // index.html
 app.get('/', function(req, res) {
-
+  logger.info('rendering index page');
   if (req.session.user) {
     res.render('pages/index', {MemberInfo : req.session.user});
   } else {
@@ -63,16 +71,19 @@ app.get('/', function(req, res) {
 });
 
 app.get('/login', function (req, res) {
+  logger.info('rendering login page');
   res.render('pages/login');
 });
 
 app.post('/login', function (req, res) {
   // get data from page's request
   var loginData = req.body;
+  logger.info('login process');
   if (req.body.email == 'admin') {
     var adminHashed = passwordHash.generate('admin');
     if (passwordHash.verify(req.body.password, adminHashed)) {
-      console.log('123')
+      //console.log('123')
+      logger.info('admin logged in');
       res.json({result : true, msg : 'admin'});
       return;
     }
@@ -93,15 +104,19 @@ app.post('/login', function (req, res) {
               userId : rows[0].user_id,
               fname : rows[0].fname
             };
+            logger.info('common user logged in');
             res.json({result : true, msg : req.session.user});
           } else {
+            logger.waring('wrong password');
             res.json({result : false, msg : "wrong password"});
           }
         } else {
+          logger.waring('wrong email');
           res.json({result : false, msg : "wrong email"});
         }
 
       } else {
+        logger.waring('Error is : ', err);
         console.log('Error is : ', err);
         res.json({result : false, msg : "login fail!"});
       }
@@ -109,6 +124,17 @@ app.post('/login', function (req, res) {
   });
 
 });
+
+app.get('/logout', function (req, res) {
+  req.session.destroy(function (err) {
+    if (err) {
+      throw err;
+    }
+    logger.info('usr logged out');
+    res.redirect('/');
+  });
+})
+
 
 //======= Register ========
 app.get('/register', function (req, res) {
@@ -156,82 +182,58 @@ app.post('/register', function(req, res) {
 // updateProfile
 app.get('/updateProfile', function(req,res){
   if(!req.session.user) {
-    req.session.error = "Please signup or login first";
-    console.log("log in first");
-    res.render("pages/login", {title:'login', message: req.session.error});
+    res.redirect("/login");
+    return;
   }
-  var user = req.session.user;
-     
-  var queryAll = "select user.*,title, time, category_id from service, user, favorite where user.user_id = favorite.user_id And favorite.service_id = service.service_id And user.email = '"+ user +"';";
-  console.log(queryAll);
 
-      pool.getConnection(function (err, connection) {
-      connection.query(queryAll, function (err, rows) {
+  var query = "select * from user where user_id=" + req.session.user.userId + ";";
+  pool.getConnection(function (err, connection) {
+    if (!err) {
+      connection.query(query, function (err, result) {
         connection.release();
-         if (!err) {
-          if(rows.length > 0) 
-          { 
-            
-            res.render('pages/updateProfile', {'data': rows});
+        if (!err) {
+          var userData = result[0];
+          console.log('in render update', userData);
+          if (userData.birthday != null) {
+            userData.birthday = moment(userData.birthday).format(dateFormat)
           }
-          else {
-            var queryUser = "Select * from user where email = '"+ user +"';";
-            pool.getConnection(function (err, connection) {
-                connection.query(queryUser, function (err, rows) {
-                  connection.release();
-                  if (!err) {
-                    console.log(rows);
-                    
-                    res.render('pages/updateProfile', {'data': rows});
-                  } else {
-                    console.log('Error is : ', err);
-                    console.log('Error while performing Query user.');
-                  }
-                });
-          });
+          //console.log('in edit user: ', userData);
+          res.render('pages/updateProfile', {data:userData, MemberInfo:req.session.user})
         }
-        } else {
-          console.log('Error is : ', err);
-          console.log('Error while performing Query.');
-        }
-      });
-    });
-
+      });      
+    } else {
+      console.log('connection error while fetching user info: ', err);
+    }
+  });
 
 });
 
-
 app.post('/updateProfile', function (req, res) {
-      var user = req.session.user;
-      
-      var data = req.body;
-      var updatedItems = " gender = '"+ data.gender + "'" + ", city = '"+ data.city + "'" +
-          ",state = '"+ data.state + "'";
-      if(data.fname != ''){
-        updatedItems += ", fname = '" + data.fname +"'";
-      }
-      if(data.lname != ''){
-        updatedItems += ", lname = '" + data.lname+"'";
-      }
-      if(data.birthday != ''){
-        updatedItems += ", birthday = '" + data.birthday+"'";
-      }
-      if(data.phone != ''){
-        updatedItems += ", phone = '" + data.phone+"'";
-      }
-      if(data.street != ''){
-        updatedItems += ", street = '" + data.street+"'";
-      }
-      if(data.zip_code != ''){
-        updatedItems += ", zip_code = '" + data.zip_code+"'";
-      }
-      console.log("updatedItems= " + updatedItems);
-      var updateProfile = "update user set " + updatedItems + "where email = '" + user +"'";
-
-     console.log("Query is: " + updateProfile);
-            
+    var user = req.session.user;
+    
+    var data = req.body;
+    
+    var updateData = {
+      fname: data.fname,
+      lname:data.lname,
+      gender:data.gender,
+      birthday:moment(data.birthday).format(dateFormat),
+      phone:data.phone,
+      street:data.street,
+      city:data.city,
+      state:data.state,
+      zip_code:data.zip_code,
+    };
+    // password will be added after
+    if (data.pwd && data.pwd != '') {
+      updateData.pwd = data.pwd;
+      updateData.pwd = passwordHash.generate(updateData.pwd); // hash the password
+      console.log('has password')
+    }
+    
+    console.log('in update profile: ', updateData);
     pool.getConnection(function (err, connection) {
-      var query = connection.query(updateProfile, data, function(err, result) {
+      var query = connection.query('update user set ? where user_id = ' + req.session.user.userId, updateData, function(err, result) {
         //
         connection.release();
         if (err) {
@@ -239,8 +241,11 @@ app.post('/updateProfile', function (req, res) {
         } else {
           if (result.affectedRows == 1) {
             return json_true(res, "Update done!");
+          } else {
+            return json_false(res, "Unable to update!");
+            console.log('result is: ', result.affectedRows);
           }
-          console.log('result is: ', result.affectedRows);
+          
         }
       });
       //console.log(query);
@@ -248,43 +253,189 @@ app.post('/updateProfile', function (req, res) {
 
 });
 
+app.get('/manage_serv_req', function (req, res) {
+  // get service
+    var servQuery = "select service_id,title,s.description as description,city,state,user_id,time,category_name from service as s, category as c where s.category_id = c.category_id and user_id = " + req.session.user.userId +";";
+    console.log(servQuery)
+    pool.getConnection(function (err, connection) {
+      var query = connection.query(servQuery, function(err, rows) {
+        connection.release();
+        if (err) {
+          console.log('db error is: ', err);
+        } else {
+          var servInfo = [];
+          if (rows.length > 0) {
+            
+            //console.log(rows);
+            for (var i = 0; i < rows.length; i++) {
+              servInfo.push({
+                service_id: rows[i].service_id,
+                title: rows[i].title,
+                description: rows[i].description,
+                city: rows[i].city,
+                state: rows[i].state,
+                time: moment(rows[i].time).format(dateTimeFormat), // change the date time to readable
+                category_name: rows[i].category_name
+              });
 
-//service list
-//select  city ="san francisco";
-//TODO, city name
-app.get('/serReqList', function (req, res) {
-  var cityName = "San Francisco";
-  var query = "select service_id, time, category_name, title from service as s, category as c " 
-  query = query + "where s.category_id = c.category_id and city ='" + cityName +"';";
-  //console.log(query);      
+            }
+          } 
+          getReq(servInfo);
+        }
+      });
+      //console.log(query);
+    });
 
+    var getReq = function (servInfo) {
+      //SQL语句
+      var reqQuery = "select request_id,title,r.description as description,city,state,user_id,time,category_name from request as r, category as c where r.category_id = c.category_id and user_id = " + req.session.user.userId +";";
+      pool.getConnection(function (err, connection) {
+        var query = connection.query(reqQuery, function(err, rows) {
+          connection.release();
+          if (err) {
+            console.log('db error is: ', err);
+          } else {
+            var reqInfo = [];
+            if (rows.length > 0) {
+              console.log(rows)
+              for (var i = 0; i < rows.length; i++) {
+                reqInfo.push({
+                  request_id: rows[i].request_id,
+                  title: rows[i].title,
+                  description: rows[i].description,
+                  city: rows[i].city,
+                  state: rows[i].state,
+                  time: moment(rows[i].time).format(dateTimeFormat),
+                  category_name: rows[i].category_name
+                });
+              }
+            }
+            res.render('pages/manage_serv_req', {services:servInfo, requests:reqInfo, MemberInfo:req.session.user});
+            //console.log('result is: ');
+          }
+        });
+        //console.log(query);
+      });
+    }
+});
+
+app.get('/recommend', function (req, res) {
+  var queryReq = "select request_id, title, time, description from request where request_id in (select distinct(request_id) from request_tag where tag_name in ( select tag_name from service_tag where service_id in (select service_id from service where user_id =" + req.session.user.userId + ")))";
+  var queryServ = "select service_id, title, time, description from service where service_id in (select distinct(service_id) from service_tag where tag_name in ( select tag_name from request_tag where request_id in (select request_id from request where user_id =" + req.session.user.userId + ")))";
+
+  var reqData, servData;
   pool.getConnection(function (err, connection) {
-    connection.query(query, function (err, rows) {
+    connection.query(queryReq, function (err, rows) {
       connection.release();
        if (!err) {
-        var servInfo = [];
+        var reqInfo = [];
         for (let i = 0; i < rows.length; i++) {
-          servInfo.push({
-            service_id : rows[i].service_id,
-            time : rows[i].time,
-            category_name : rows[i].category_name,
+          reqInfo.push({
+            request_id : rows[i].request_id,
+            time : moment(rows[i].time).format(dateFormat),
+            description : rows[i].description,
             title : rows[i].title
           });
         }
-        //console.log(servInfo);
-        // add session check
-        if (req.session.user) {
-          res.render('pages/serReqList', {'data': servInfo, 'MemberInfo': req.session.user});
-        } else {
-          res.render('pages/serReqList', {'data': servInfo});
-        }
         
+        getRequests(reqInfo);        
       } else {
         console.log('Error is : ', err);
         console.log('Error while performing Query.');
       }
     });
   });
+
+  var getRequests = function (reqInfo) {
+    pool.getConnection(function (err, connection) {
+      connection.query(queryServ, function (err, rows) {
+        connection.release();
+         if (!err) {
+          var servInfo = [];
+          for (let i = 0; i < rows.length; i++) {
+            servInfo.push({
+              service_id : rows[i].service_id,
+              time : moment(rows[i].time).format(dateFormat),
+              description : rows[i].description,
+              title : rows[i].title
+            });
+          }
+          
+          res.render('pages/recommend', {servs: servInfo, reqs: reqInfo, MemberInfo:req.session.user});
+        } else {
+          console.log('Error is : ', err);
+          console.log('Error while performing Query.');
+        }
+      });
+    });
+  }
+
+});
+
+
+
+//service list
+//select  city ="san francisco";
+//TODO, city name
+app.get('/serReqList', function (req, res) {
+  var cityName = "San Francisco";
+  var servQuery = "select service_id, time, category_name, title from service as s, category as c " 
+  servQuery = servQuery + "where s.category_id = c.category_id and city ='" + cityName +"';";
+  //console.log(query);      
+
+  pool.getConnection(function (err, connection) {
+    connection.query(servQuery, function (err, rows) {
+      connection.release();
+       if (!err) {
+        var servInfo = [];
+        for (let i = 0; i < rows.length; i++) {
+          servInfo.push({
+            service_id : rows[i].service_id,
+            time : moment(rows[i].time).format(dateFormat),
+            category_name : rows[i].category_name,
+            title : rows[i].title
+          });
+        }
+        console.log('in ser list: ', servInfo);
+        // add session check
+        getRequests(servInfo);        
+      } else {
+        console.log('Error is : ', err);
+        console.log('Error while performing Query.');
+      }
+    });
+  });
+
+  var getRequests = function(servInfo) {
+    var reqQuery = "select request_id, time, category_name, title from request as r, category as c where r.category_id = c.category_id and city ='" + cityName +"';"
+    pool.getConnection(function (err, connection) {
+      connection.query(reqQuery, function (err, rows) {
+        connection.release();
+         if (!err) {
+          var reqInfo = [];
+          for (let i = 0; i < rows.length; i++) {
+            reqInfo.push({
+              request_id : rows[i].request_id,
+              time : moment(rows[i].time).format(dateFormat),
+              category_name : rows[i].category_name,
+              title : rows[i].title
+            });
+          }
+          console.log('in req list: ', reqInfo);
+          // add session check
+          if (req.session.user) {
+            res.render('pages/serReqList', {'data': servInfo, 'reqs': reqInfo, 'MemberInfo': req.session.user});
+          } else {
+            res.render('pages/serReqList', {'data': servInfo, 'reqs': reqInfo});
+          }
+          
+        } else {
+          console.log('Error is : ', err);
+          console.log('Error while performing Query.');
+        }
+      });
+    });
+  }
 });
 
 // admin user list
@@ -316,7 +467,7 @@ app.get('/admin', function (req, res) {
       }
 
       if (!err) {
-        //console.log('userInfo');
+        //console.log('in admin ', userInfo);
         getServInfo(userInfo);
         //res.render('pages/admin', {userData : userInfo});
       } else {
@@ -344,16 +495,95 @@ app.get('/admin', function (req, res) {
               city: rows[i].city,
               state: rows[i].state,
               user_id: rows[i].user_id,
-              time: rows[i].time,
+              time: moment(rows[i].time).format(dateFormat),
               category_id: rows[i].category_id
             });
           }
-          res.render('pages/admin', {userData : userInfo, servData : servInfo, MemberInfo : req.session.user});
+          getReqInfo(userInfo, servInfo);
+          //res.render('pages/admin', {userData : userInfo, servData : servInfo, MemberInfo : req.session.user});
         } else {
           console.log('Error is : ', err);
         }
       })
-    })
+    });
+  };
+
+  var getReqInfo = function (userInfo, servInfo) {
+    var reqInfo = [];
+    var reqQuery = "SELECT * FROM request";
+    pool.getConnection(function (err, connection) {
+      connection.query(reqQuery, function (err, rows) {
+        connection.release();
+        console.log(rows);
+        if (!err) {
+          for (let i = 0; i < rows.length; i++) {
+            reqInfo.push({
+              request_id: rows[i].request_id,
+              title: rows[i].title,
+              video: rows[i].video,
+              image: rows[i].image,
+              description: rows[i].description,
+              city: rows[i].city,
+              state: rows[i].state,
+              user_id: rows[i].user_id,
+              time: moment(rows[i].time).format(dateFormat),
+              category_id: rows[i].category_id
+            });
+          }
+          getTagInfo(userInfo, servInfo, reqInfo);
+          //res.render('pages/admin', {userData : userInfo, servData : servInfo, requestData:reqInfo, MemberInfo : req.session.user});
+        } else {
+          console.log('Error is : ', err);
+        }
+      })
+    });
+  };
+
+  var getTagInfo = function (userInfo, servInfo, reqInfo) {
+    var tagInfo = [];
+    var tagQuery = "SELECT * FROM tag";
+    pool.getConnection(function (err, connection) {
+      connection.query(tagQuery, function (err, rows) {
+        connection.release();
+        
+        if (!err) {
+          for (let i = 0; i < rows.length; i++) {
+            tagInfo.push({
+              tag_name: rows[i].tag_name
+            });
+          }
+          console.log('tag', tagInfo)
+          getCateInfo(userInfo, servInfo, reqInfo, tagInfo);
+          //res.render('pages/admin', {userData : userInfo, servData : servInfo, requestData:reqInfo, MemberInfo : req.session.user});
+        } else {
+          console.log('Error is : ', err);
+        }
+      })
+    });   
+  };
+
+  var getCateInfo = function (userInfo, servInfo, reqInfo, tagInfo) {
+    var cateInfo=[];
+    var cateQuery = "SELECT * FROM category";
+    pool.getConnection(function (err, connection) {
+      connection.query(cateQuery, function (err, rows) {
+        connection.release();
+        
+        if (!err) {
+          for (let i = 0; i < rows.length; i++) {
+            cateInfo.push({
+              category_id:rows[i].category_id,
+              category_name:rows[i].category_name,
+              description:rows[i].description
+            });
+          }
+          
+          res.render('pages/admin', {userData : userInfo, servData : servInfo, requestData:reqInfo, tagData: tagInfo, cateData:cateInfo, MemberInfo : req.session.user});
+        } else {
+          console.log('Error is : ', err);
+        }
+      })
+    }); 
   }
 });
 
@@ -426,15 +656,300 @@ app.post('/removeuser', function (req, res) {
   });
 });
 
+app.post('/remove_serv_req', function (req, res) {
+  var data = req.body;
+  var query = "";
+  if (data.type == "service") {
+    query = "delete from service where service_id = " + data.id + ";";
+  } else {
+    query = "delete from request where request_id = " + data.id + ";";
+  }
+
+  pool.getConnection(function (err, connection) {
+    connection.query(query, function (err, result) {
+      connection.release();
+      if (!err) {
+        if (result.affectedRows == 1) {
+          res.json({result : true, msg : "Delete Done!"});
+        } else {
+          res.json({result : false, msg : "Delete Fail!"});
+        }
+      } else {
+        console.log(err);
+        res.json({result : false, msg : "Delete Fail!"});
+      }
+    });
+  });
+});
+
+app.post('/remove_req_serv_user', function (req, res) {
+  var data = req.body;
+  console.log(data);
+  var request_id = 0, service_id = 0;
+  var query = "delete from ";
+  if (data.type == 'request') {
+    request_id = data.id;
+    query += "request where request_id = " + request_id;
+  } else {
+    service_id = data.id;
+    query += "service where service_id = " + service_id;
+  }
+  console.log(query);
+  pool.getConnection(function (err, connection) {
+    connection.query(query, function (err, result) {
+      connection.release();
+      if (!err) {
+        if (result.affectedRows == 1) {
+          res.json({result : true, msg : "Delete Done!"});
+        } else {
+          res.json({result : false, msg : "Delete Fail!"});
+        }
+      } else {
+        console.log(err);
+        res.json({result : false, msg : "Delete Fail!"});
+      }
+    });
+  });
+});
+
+app.post('/removetag', function (req, res) {
+  var tag_name = req.body.id;
+  console.log(tag_name)
+  var query = "delete from tag where tag_name = '" + tag_name + "';";
+  pool.getConnection(function (err, connection) {
+    connection.query(query, function (err, result) {
+      connection.release();
+      if (!err) {
+        if (result.affectedRows == 1) {
+          res.json({result : true, msg : "Delete Tag Done!"});
+        } else {
+          res.json({result : false, msg : "Delete Fail!"});
+        }
+      } else {
+        console.log(err);
+        res.json({result : false, msg : "Delete Fail!"});
+      }
+    });
+  });
+});
+
+app.post('/removecategory', function (req, res) {
+  var category_id = req.body.category_id;
+  //console.log(tag_name)
+  var query = "delete from category where category_id = " + category_id + ";";
+  pool.getConnection(function (err, connection) {
+    connection.query(query, function (err, result) {
+      connection.release();
+      if (!err) {
+        if (result.affectedRows == 1) {
+          res.json({result : true, msg : "Delete Category Done!"});
+        } else {
+          res.json({result : false, msg : "Delete Fail!"});
+        }
+      } else {
+        console.log(err);
+        res.json({result : false, msg : "Delete Fail!"});
+      }
+    });
+  });
+});
+
+app.post('/createtag', function (req, res) {
+  var tag_name = req.body.tag_name;
+  var data = {tag_name: tag_name};
+  pool.getConnection(function (err, connection) {
+      var query = connection.query('INSERT INTO tag SET ?', data, function(err, result) {
+        //
+        connection.release();
+        if (err) {
+          console.log('db error is: ', err);
+          res.json({result : false, msg : err});
+        } else {
+          if (result.affectedRows == 1) {
+            res.json({result : true, msg : "Create Tag Done!"});
+          } else {
+            res.json({result : false, msg : "Create Tag Fail!"});
+          }
+          //console.log('result is: ', result.affectedRows);
+        }
+      });
+      //console.log(query);
+  });
+});
+
+app.post('/createcategory', function (req, res) {
+
+  pool.getConnection(function (err, connection) {
+      var query = connection.query('INSERT INTO category SET ?', req.body, function(err, result) {
+        //
+        connection.release();
+        if (err) {
+          console.log('db error is: ', err);
+          res.json({result : false, msg : err});
+        } else {
+          if (result.affectedRows == 1) {
+            res.json({result : true, msg : "Create category Done!"});
+          } else {
+            res.json({result : false, msg : "Create category Fail!"});
+          }
+          //console.log('result is: ', result.affectedRows);
+        }
+      });
+      //console.log(query);
+  });
+});
+
+app.get('/edit_serv/:id', function (req, res) {
+
+  var service_id = req.params.id;
+  var query = "select s.service_id, title, s.description, city, state, time, category_name from service as s, category as c where s.category_id = c.category_id and service_id = " + service_id + ";";
+  pool.getConnection(function (err, connection) {
+    if (!err) {
+      connection.query(query, function (err, result) {
+        connection.release();
+        if (!err) {
+          var servData = {
+            service_id:result[0].service_id,
+            title: result[0].title,
+            description:result[0].description,
+            city:result[0].city,
+            state:result[0].state,
+            time:moment(result[0].time).format(dateTimeFormat),
+            category_name:result[0].category_name
+          };
+          //console.log('in edit serv: ', servData);
+          res.render('pages/edit_serv', {data:servData, MemberInfo:req.session.user})
+        }
+      });      
+    } else {
+      console.log('connection error while fetching user info: ', err);
+    }
+
+  });
+});
+
+app.get('/edit_req/:id', function (req, res) {
+
+  var request_id = req.params.id;
+  
+  
+  var query = "select r.request_id, title, r.description, city, state, time, category_name from request as r, category as c where r.category_id = c.category_id and request_id = " + request_id + ";";
+  console.log('in edit req: ',query);
+  pool.getConnection(function (err, connection) {
+    if (!err) {
+      connection.query(query, function (err, result) {
+        connection.release();
+        if (!err) {
+          var reqData = {
+            request_id:result[0].request_id,
+            title: result[0].title,
+            description:result[0].description,
+            city:result[0].city,
+            state:result[0].state,
+            time:moment(result[0].time).format(dateTimeFormat),
+            category_name:result[0].category_name
+          };
+          console.log('in edit req: ', reqData);
+          res.render('pages/edit_req', {data:reqData, MemberInfo:req.session.user})
+        }
+      });      
+    } else {
+      console.log('connection error while fetching user info: ', err);
+    }
+
+  });
+});
+
+app.post('/edit_serv', function (req, res) {
+  var servInfo = {
+    title: req.body.title,
+    description: req.body.description
+  }
+
+  console.log('in post edit serv', servInfo);
+  var query = pool.getConnection(function (err, connection) {
+    if (!err) {
+      connection.query('update service set ? where service_id = ' + req.body.service_id, servInfo, function (err, result) {
+        connection.release();
+        if (!err) {
+          //console.log(result);
+          if (result.affectedRows == 1) {
+            json_true(res, "Update done!");
+          } else {
+            json_false(res, "Update fail!");
+          }
+        } else {
+          console.log('Error: ', err);
+          json_false(res, "Update fail!");
+        }
+      });
+    } else {
+      console.log('Connection Error: ', err);
+      json_false(res, "Update fail!");
+    }
+  });
+})
+
+app.post('/edit_req', function (req, res) {
+  var reqInfo = {
+    title: req.body.title,
+    description: req.body.description
+  }
+
+  console.log('in post edit req', reqInfo);
+  var query = pool.getConnection(function (err, connection) {
+    if (!err) {
+      connection.query('update request set ? where request_id = ' + req.body.request_id, reqInfo, function (err, result) {
+        connection.release();
+        if (!err) {
+          //console.log(result);
+          if (result.affectedRows == 1) {
+            json_true(res, "Update done!");
+          } else {
+            json_false(res, "Update fail!");
+          }
+        } else {
+          console.log('Error: ', err);
+          json_false(res, "Update fail!");
+        }
+      });
+    } else {
+      console.log('Connection Error: ', err);
+      json_false(res, "Update fail!");
+    }
+  });
+});
+
 //======= Create Service ========
 app.get('/service_create', function (req, res) {
-  var renderPage = function (data) {
+  var renderPage = function (cdata, tdata) {
     if (req.session.user) {
-      res.render('pages/service_create', {cateData: data, MemberInfo:req.session.user});
+      res.render('pages/service_create', {cateData: cdata, tagData:tdata, MemberInfo:req.session.user});
     } else {
       res.redirect('/login');
     }
-  }
+  };
+
+  var getTags = function (cdata) {
+    pool.getConnection(function (err, connection) {
+      connection.query('SELECT * FROM tag;', function(err, rows) {
+        connection.release();
+        if (err) {
+          console.log('db error is: ', err);
+
+        } else {          
+          var tdata = [];
+          for(let i = 0; i < rows.length; i++) {
+            tdata.push({
+              tag_name: rows[i].tag_name
+            });
+          }
+          //console.log('data: ', data)
+          renderPage(cdata, tdata);
+        }
+      });
+    });
+  };
   pool.getConnection(function (err, connection) {
     connection.query('SELECT * FROM category;', function(err, rows) {
       connection.release();
@@ -442,15 +957,15 @@ app.get('/service_create', function (req, res) {
         console.log('db error is: ', err);
 
       } else {          
-        var data = [];
+        var cdata = [];
         for(let i = 0; i < rows.length; i++) {
-          data.push({
+          cdata.push({
             category_id: rows[i].category_id,
             category_name: rows[i].category_name
           });
         }
-        console.log('data: ', data)
-        renderPage(data);
+        console.log('data: ', cdata)
+        getTags(cdata);
       }
     });
   });
@@ -483,25 +998,78 @@ app.post('/service_create', function (req, res) {
         res.json({result : false, msg : err});
       } else {
         if (result.affectedRows == 1) {
-          json_true(res, "register done!");
-          return;
+          insertTags(result.insertId, req.body.tags);
+          //json_true(res, "register done!");
+          //return;
         }
         console.log('result is: ', result.affectedRows);
       }
     });
     //console.log(query);
   });
+
+  var insertTags = function (service_id, tags) {
+    var query1 = "INSERT INTO service_tag (tag_name, service_id) VALUES ?";
+    var values = [];
+    for(var i = 0; i < tags.length; i++) {
+      var arr = [];
+      arr.push(tags[i]);
+      arr.push(service_id);
+      
+      values.push(arr);
+    }
+    console.log(values);
+    pool.getConnection(function (err, connection) {
+      var query = connection.query(query1, [values], function(err, result) {
+        connection.release();
+        console.log(result);
+        // add to tag_req
+        if (err) {
+          console.log('db error is: ', err);
+          res.json({result : false, msg : err});
+        } else {
+          if (result.affectedRows == tags.length) {
+            return json_true(res, "create done!");
+          }
+          //console.log('result is: ', result.affectedRows);
+        }
+      });
+      //console.log(query);
+    });
+  };
 });
 
 //======= Create Request =========
 app.get('/request_create', function (req, res) {
-  var renderPage = function (data) {
+  var renderPage = function (cdata, tdata) {
     if (req.session.user) {
-      res.render('pages/request_create', {cateData: data, MemberInfo:req.session.user});
+      res.render('pages/request_create', {cateData: cdata, tagData:tdata, MemberInfo:req.session.user});
     } else {
       res.redirect('/login');
     }
   }
+
+  var getTags = function (cdata) {
+    pool.getConnection(function (err, connection) {
+      connection.query('SELECT * FROM tag;', function(err, rows) {
+        connection.release();
+        if (err) {
+          console.log('db error is: ', err);
+
+        } else {          
+          var tdata = [];
+          for(let i = 0; i < rows.length; i++) {
+            tdata.push({
+              tag_name: rows[i].tag_name
+            });
+          }
+          //console.log('data: ', data)
+          renderPage(cdata, tdata);
+        }
+      });
+    });
+  };
+
   pool.getConnection(function (err, connection) {
     connection.query('SELECT * FROM category;', function(err, rows) {
       connection.release();
@@ -509,15 +1077,15 @@ app.get('/request_create', function (req, res) {
         console.log('db error is: ', err);
 
       } else {          
-        var data = [];
+        var cdata = [];
         for(let i = 0; i < rows.length; i++) {
-          data.push({
+          cdata.push({
             category_id: rows[i].category_id,
             category_name: rows[i].category_name
           });
         }
         //console.log('data: ', data)
-        renderPage(data);
+        getTags(cdata);
       }
     });
   });
@@ -541,26 +1109,60 @@ app.post('/request_create', function (req, res) {
     category_id : data.category_id,
     user_id : req.session.user.userId
   };
-  console.log(request);
+  //console.log(request);
   pool.getConnection(function (err, connection) {
     var query = connection.query('INSERT INTO request SET ?', request, function(err, result) {
       connection.release();
+      console.log(result);
+      // add to tag_req
       if (err) {
         console.log('db error is: ', err);
         res.json({result : false, msg : err});
       } else {
         if (result.affectedRows == 1) {
-          return json_true(res, "register done!");
+          var request_id = result.insertId;
+          insertTags(request_id, req.body.tags);
+          //return json_true(res, "register done!");
         }
-        console.log('result is: ', result.affectedRows);
+        //console.log('result is: ', result.affectedRows);
       }
     });
     //console.log(query);
   });
+
+  var insertTags = function (request_id, tags) {
+    var query1 = "INSERT INTO request_tag (tag_name, request_id) VALUES ?";
+    var values = [];
+    for(var i = 0; i < tags.length; i++) {
+      var arr = [];
+      arr.push(tags[i]);
+      arr.push(request_id);
+      
+      values.push(arr);
+    }
+    console.log(values);
+    pool.getConnection(function (err, connection) {
+      var query = connection.query(query1, [values], function(err, result) {
+        connection.release();
+        console.log(result);
+        // add to tag_req
+        if (err) {
+          console.log('db error is: ', err);
+          res.json({result : false, msg : err});
+        } else {
+          if (result.affectedRows == tags.length) {
+            return json_true(res, "create done!");
+          }
+          //console.log('result is: ', result.affectedRows);
+        }
+      });
+      //console.log(query);
+    });
+  };
 })
 
 //======= Get Detail ========
-app.get('/serReqDetail/:id', function (req, res) {
+app.get('/serDetail/:id', function (req, res) {
   var service_id = req.params.id;
   var query = "select s.service_id, s.title, s.time posttime, c.category_name, s.city, s.description, u.fname, u.phone, u.email, r.comment, r.time commenttime, avg(rate) avgrate from service as s, user as u, category as c, review as r where s.category_id = c.category_id and u.user_id = s.user_id and r.service_id = s.service_id and s.service_id = " + service_id + ";";
   pool.getConnection(function (err, connection) {
@@ -587,18 +1189,40 @@ app.get('/serReqDetail/:id', function (req, res) {
           console.log('db error is: ', err);
         } else {          
           
-          console.log('data: ', detailData)
+          //console.log('data: ', detailData)
+          detailData.posttime = moment(detailData.posttime).format(dateFormat);
           //renderPage(data);
           if (req.session.user) {
-            res.render('pages/serReqDetail', {data: detailData, reviews: rows1, MemberInfo: req.session.user});
+            res.render('pages/serDetail', {data: detailData, reviews: rows1, MemberInfo: req.session.user});
           } else {
-            res.render('pages/serReqDetail', {data: detailData, reviews: rows1});
+            res.render('pages/serDetail', {data: detailData, reviews: rows1});
           }
         }
       });
     });
 
   }
+});
+
+app.get('/reqDetail/:id', function (req, res) {
+  var request_id = req.params.id;
+  var query = "select r.request_id, r.title, r.time posttime, c.category_name, r.city, r.description, u.fname, u.phone, u.email from request as r, user as u, category as c where r.category_id = c.category_id and u.user_id = r.user_id and r.request_id = " + request_id + ";";
+  //console.log(query)
+  pool.getConnection(function (err, connection) {
+    connection.query(query, function(err, rows) {
+      connection.release();
+      if (err) {
+        console.log('db error is: ', err);
+      } else {      
+        rows[0].posttime = moment(rows[0].posttime).format(dateFormat);
+        if (req.session.user) {
+          res.render('pages/reqDetail', {data: rows[0], MemberInfo: req.session.user});
+        } else {
+          res.render('pages/reqDetail', {data: rows[0]});
+        }
+      }
+    });
+  });
 });
 
 app.post('/writereview', function (req, res) {

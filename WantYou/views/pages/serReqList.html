@@ -32,39 +32,65 @@
         <!-- TODO -->
         </br>
         <ul class="side-navbar nav nav-pills nav-stacked" >
-          <li class="active" style="font-weight: bold;"> <a href="/serviceList" id="serviceList">Services </a></li>
+          <li class="active"><a id="serviceList">Services </a></li>
           </br>
-          <li style="font-weight: bold;"><a href="/requestList" id="requestList">Requests </a></li>          
+          <li style="font-weight: bold;"><a id="requestList">Requests </a></li>          
         </ul> 
       </aside>
 
-      <div class="container col-lg-9" style= "margin-left:20px; margin-top: -40px">
+      <div id="service_list" class="container col-lg-9 " style= "margin-left:20px; margin-top: -40px">
         <div id="location" class="row " name = "location" >
               <br>
               <!-- TODO -->
               <!--  Location from the index page -->
-          <h3>San Francisco</h4> </br>
+          <h3>San Francisco</h4>
         </div>
 
          <!--  Query Service List-->
         <table class="table table-striped" style= "margin-left:-20px; ">
             <thead>
               <tr>
-                <th class="col-lg-1">Date</th>
-                <th class="col-lg-1">Category</th>
+                <th class="col-lg-2">Date</th>
+                <th class="col-lg-2">Category</th>
                 <th class="col-lg-8">Title</th>
               </tr>
             </thead>
 
             <tbody>           
-           <% for(var i = 0; i < data.length; i++) { 
-              var str = data[i].time.toString();
-              var date = str.substring(4,10);
-           %>   
+           <% for(var i = 0; i < data.length; i++) { %>   
               <tr>
-                <td ><%= date %></td>
-                <td ><a href=""><%= data[i].category_name %></a></td>
-                <td ><a href="/serReqDetail/<%= data[i].service_id %>"><%= data[i].title %></a></td>
+                <td ><%= data[i].time %></td>
+                <td ><%= data[i].category_name %></td>
+                <td ><a href="/serDetail/<%= data[i].service_id %>"><%= data[i].title %></a></td>
+              </tr>
+            <% } %>
+            </tbody>
+        </table>
+      </div>
+
+      <div id="req_list" class="container col-lg-9 hidden" style= "margin-left:20px; margin-top: -40px">
+        <div id="location" class="row " name = "location" >
+              <br>
+              <!-- TODO -->
+              <!--  Location from the index page -->
+          <h3>San Francisco</h4>
+        </div>
+
+        <table class="table table-striped" style= "margin-left:-20px; ">
+            <thead>
+              <tr>
+                <th class="col-lg-2">Date</th>
+                <th class="col-lg-2">Category</th>
+                <th class="col-lg-8">Title</th>
+              </tr>
+            </thead>
+
+            <tbody>           
+            <% for(var i = 0; i < reqs.length; i++) { %>   
+              <tr>
+                <td ><%= reqs[i].time %></td>
+                <td ><%= reqs[i].category_name %></td>
+                <td ><a href="/reqDetail/<%= reqs[i].request_id %>"><%= reqs[i].title %></a></td>
               </tr>
             <% } %>
             </tbody>
@@ -82,6 +108,20 @@
 </html>
 
 <script type="text/javascript">
+;jQuery(function ($) {
+  $('#serviceList').on('click', function () {
+    $('#req_list').addClass('hidden');
+    $('#service_list').removeClass('hidden');
+    $(this).parents().addClass('active');
+    $('#requestList').parents().removeClass('active');
+  });
 
+  $('#requestList').on('click', function () {
+    $('#req_list').removeClass('hidden');
+    $('#service_list').addClass('hidden');   
+    $(this).parents().addClass('active');
+    $('#serviceList').parents().removeClass('active');
+  })
+});
 
 </script>

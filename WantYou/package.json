@@ -14,9 +14,11 @@
     "express": "4.13.3",
     "express-session": "^1.9.1",
     "http": "*",
+    "moment": "^2.13.0",
     "mysql": "*",
     "password-hash": "^1.2.2",
-    "request": "*"
+    "request": "*",
+    "winston": "^2.2.0"
   },
   "engines": {
     "node": "0.12.7"

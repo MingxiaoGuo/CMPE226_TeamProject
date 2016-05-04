@@ -73,10 +73,8 @@ CREATE TABLE `request` (
 
 
 CREATE TABLE `tag` (
-  `tag_id` int(11) NOT NULL AUTO_INCREMENT,
   `tag_name` varchar(45) NOT NULL,
-  PRIMARY KEY (`tag_id`),
-  UNIQUE KEY `tag_name_UNIQUE` (`tag_name`)
+  PRIMARY KEY (`tag_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -84,11 +82,11 @@ CREATE TABLE `tag` (
 
 CREATE TABLE `request_tag` (
   `request_id` int(11) NOT NULL,
-  `tag_id` int(11) NOT NULL,
-  PRIMARY KEY (`request_id`,`tag_id`),
-  KEY `f_rt_tage_idx` (`tag_id`),
+  `tag_name` varchar(45) NOT NULL,
+  PRIMARY KEY (`request_id`,`tag_name`),
+  KEY `f_rt_tage_idx` (`tag_name`),
   CONSTRAINT `f_rt_request` FOREIGN KEY (`request_id`) REFERENCES `request` (`request_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `f_rt_tage` FOREIGN KEY (`tag_id`) REFERENCES `tag` (`tag_id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `f_rt_tage` FOREIGN KEY (`tag_name`) REFERENCES `tag` (`tag_name`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -106,11 +104,11 @@ CREATE TABLE `review` (
 
 CREATE TABLE `service_tag` (
   `service_id` int(11) NOT NULL,
-  `tag_id` int(11) NOT NULL,
-  PRIMARY KEY (`service_id`,`tag_id`),
-  KEY `f_st_tag_idx` (`tag_id`),
+  `tag_name` varchar(45) NOT NULL,
+  PRIMARY KEY (`service_id`,`tag_name`),
+  KEY `f_st_tag_idx` (`tag_name`),
   CONSTRAINT `f_st_service` FOREIGN KEY (`service_id`) REFERENCES `service` (`service_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `f_st_tag` FOREIGN KEY (`tag_id`) REFERENCES `tag` (`tag_id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `f_st_tag` FOREIGN KEY (`tag_name`) REFERENCES `tag` (`tag_name`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
