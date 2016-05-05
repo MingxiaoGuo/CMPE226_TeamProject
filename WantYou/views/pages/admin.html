@@ -343,7 +343,7 @@
           alert(res.msg);
           window.location.reload();
         } else {
-          alert(res.msg);
+          alert("Delete Fail!");
         }
       });
     } else {
@@ -370,7 +370,7 @@
   $('.removeRequest').on('click', function () {
     if (confirm('Are you sure you want to delete this request?')) {
       //alert($(this).attr('uid'));
-      $.post('/remove_serv_req', {tag_name: $(this).attr('rid')}, function (res) {
+      $.post('/remove_serv_req', {id: $(this).attr('rid')}, function (res) {
         if (res.result) {
           alert(res.msg);
           window.location.reload();
@@ -391,7 +391,7 @@
           alert(res.msg);
           window.location.reload();
         } else {
-          alert(res.msg);
+          alert("Delete Fail!");
         }
       });
     } else {
@@ -407,7 +407,7 @@
           alert(res.msg);
           window.location.reload();
         } else {
-          alert(res.msg);
+          alert("Delete Fail!");
         }
       });
     } else {

@@ -18,7 +18,8 @@
     "mysql": "*",
     "password-hash": "^1.2.2",
     "request": "*",
-    "winston": "^2.2.0"
+    "winston": "^2.2.0",
+    "mongoose": "*"
   },
   "engines": {
     "node": "0.12.7"

@@ -80,7 +80,7 @@
               </div>
               <!-- Button -->
               <div class="col-md-3">
-                  <button id="btn-image" type="button" class="btn btn-info">Upload
+                  <button id="btnimage" type="button" class="btn btn-info">Upload
                   </button>
               </div>
 
@@ -135,13 +135,15 @@
   $('#btn-create').on('click', function () {
     var tags = $('#tag').val()
     console.log(tags);
+    var inputimage = $("#image").val()
     var data = {
       title : $('#title').val(),
       description : $('#description').val(),
       city : $('#city option:selected').val(),
       state : $('#state option:selected').val(),
       category_id : $('#category option:selected').attr('cid'),
-      tags : tags
+      tags : tags,
+      image : inputimage
     };
     $.post('/request_create', data, function (res) {
       if (res.result) {
@@ -153,5 +155,12 @@
       }
     });
   });
+
+  $('#btnimage').on('click', function () {
+    alert('input');
+    
+    $.post('/')
+    
+  })
 });
 </script>

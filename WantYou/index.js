@@ -1,6 +1,7 @@
 'use strict';
 
 var express = require('express');
+var fs = require('fs');
 var session = require('express-session');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
@@ -11,6 +12,11 @@ var request = require("request");
 var moment = require('moment');
 var mysql = require("mysql");
 var winston = require('winston');
+var mongoose = require('mongoose');
+
+var uri = 'mongodb://admin:admin@ds013202.mlab.com:13202/cmpe226';
+
+
 var pool = mysql.createPool({
   host:'localhost',
   user:'root',
@@ -21,12 +27,12 @@ var passwordHash = require('password-hash');
 var dateTimeFormat = 'YYYY-MM-DD HH:mm:ss';
 var dateFormat = 'YYYY-MM-DD';
 
-  var logger = new (winston.Logger)({
-    transports: [
-      new (winston.transports.Console)(),
-      new (winston.transports.File)({ filename: 'logfile.log' })
-    ]
-  });
+var logger = new (winston.Logger)({
+  transports: [
+    new (winston.transports.Console)(),
+    new (winston.transports.File)({ filename: 'logfile.log' })
+  ]
+});
 
 //Open mysql connection
 pool.getConnection(function(err){
@@ -37,6 +43,15 @@ pool.getConnection(function(err){
     logger.warn("Error connecting database ... ");    
   }
 });
+
+
+mongoose.createConnection(uri);
+var imageSchema = new mongoose.Schema({
+    type:String,
+    id:String,
+    image:Buffer
+});
+var imageModel = mongoose.model('admin', imageSchema);
 
 
 app.set('port', (process.env.PORT || 5000));
@@ -107,16 +122,16 @@ app.post('/login', function (req, res) {
             logger.info('common user logged in');
             res.json({result : true, msg : req.session.user});
           } else {
-            logger.waring('wrong password');
+            logger.warning('wrong password');
             res.json({result : false, msg : "wrong password"});
           }
         } else {
-          logger.waring('wrong email');
+          logger.warning('wrong email');
           res.json({result : false, msg : "wrong email"});
         }
 
       } else {
-        logger.waring('Error is : ', err);
+        logger.warning('Error is : ', err);
         console.log('Error is : ', err);
         res.json({result : false, msg : "login fail!"});
       }
@@ -133,7 +148,7 @@ app.get('/logout', function (req, res) {
     logger.info('usr logged out');
     res.redirect('/');
   });
-})
+})  
 
 
 //======= Register ========
@@ -372,8 +387,6 @@ app.get('/recommend', function (req, res) {
 
 });
 
-
-
 //service list
 //select  city ="san francisco";
 //TODO, city name
@@ -467,11 +480,11 @@ app.get('/admin', function (req, res) {
       }
 
       if (!err) {
-        //console.log('in admin ', userInfo);
+        logger.info('in admin ', userInfo);
         getServInfo(userInfo);
         //res.render('pages/admin', {userData : userInfo});
       } else {
-        console.log('Error is : ', err);
+        logger.info('Error is : ', err);
         console.log('Error while performing Query.');
       }
     });
@@ -636,23 +649,50 @@ app.post('/edituser', function (req, res) {
   console.log(query);
 });
 
+// call back hell, need to improve
 app.post('/removeuser', function (req, res) {
-  console.log(req.body);
-  var query = "delete from user where user_id=" + req.body.user_id + ";";
+  var user_id = req.body.user_id;
   pool.getConnection(function (err, connection) {
-    connection.query(query, function (err, result) {
-      connection.release();
-      if (!err) {
-        if (result.affectedRows == 1) {
-          res.json({result : true, msg : "Delete Done!"});
-        } else {
-          res.json({result : false, msg : "Delete Fail!"});
+    connection.beginTransaction(function(err) {
+      if (err) { throw err; }
+      connection.query('delete from service where user_id = ' + user_id, function(err, result) {
+        if (err) {
+          return connection.rollback(function() {
+            throw err;
+          });
         }
-      } else {
-        console.log(err);
-        res.json({result : false, msg : "Delete Fail!"});
-      }
+
+        connection.query('delete from request where user_id = ' + user_id, function(err, result) {
+          if (err) {
+            return connection.rollback(function() {
+              throw err;
+            });
+          }
+
+          connection.query('delete from user where user_id = ' + user_id, function (err, result) {
+            if (err) {
+              return connection.rollback(function () {
+                throw err;
+              });
+            }
+            connection.commit(function(err) {
+              if (err) {
+                return connection.rollback(function() {
+                  throw err;
+                });
+              } else {
+                console.log('success!');
+                connection.release();
+                res.json({result : true, msg : "Delete Done!"});                
+              }
+
+            });
+          });
+
+        });
+      });
     });
+    
   });
 });
 
@@ -664,7 +704,7 @@ app.post('/remove_serv_req', function (req, res) {
   } else {
     query = "delete from request where request_id = " + data.id + ";";
   }
-
+  console.log('in remove', query)
   pool.getConnection(function (err, connection) {
     connection.query(query, function (err, result) {
       connection.release();
@@ -714,43 +754,88 @@ app.post('/remove_req_serv_user', function (req, res) {
 
 app.post('/removetag', function (req, res) {
   var tag_name = req.body.id;
-  console.log(tag_name)
-  var query = "delete from tag where tag_name = '" + tag_name + "';";
   pool.getConnection(function (err, connection) {
-    connection.query(query, function (err, result) {
-      connection.release();
-      if (!err) {
-        if (result.affectedRows == 1) {
-          res.json({result : true, msg : "Delete Tag Done!"});
-        } else {
-          res.json({result : false, msg : "Delete Fail!"});
+    connection.beginTransaction(function(err) {
+      if (err) { throw err; }
+      connection.query('delete from request_tag where tag_name = ' + tag_name, function(err, result) {
+        if (err) {
+          return connection.rollback(function() {
+            throw err;
+          });
         }
-      } else {
-        console.log(err);
-        res.json({result : false, msg : "Delete Fail!"});
-      }
-    });
+
+        connection.query('delete from service_tag where tag_name = ' + tag_name, function(err, result) {
+          if (err) {
+            return connection.rollback(function() {
+              throw err;
+            });
+          }
+
+          connection.query('delete from tag where tag_name = ' + tag_name, function (err, result) {
+            if (err) {
+              return connection.rollback(function () {
+                throw err;
+              });
+            }
+            connection.commit(function(err) {
+              if (err) {
+                return connection.rollback(function() {
+                  throw err;
+                });
+              } else {
+                console.log('success!');
+                connection.release();
+                res.json({result : true, msg : "Delete Done!"});                
+              }
+            }); // end of commit function
+          }); // end of delete tag
+        }); // end of delete service_tag
+      }); // end of delete request_tag
+    }); // end of transaction
   });
 });
 
 app.post('/removecategory', function (req, res) {
   var category_id = req.body.category_id;
   //console.log(tag_name)
-  var query = "delete from category where category_id = " + category_id + ";";
   pool.getConnection(function (err, connection) {
-    connection.query(query, function (err, result) {
-      connection.release();
-      if (!err) {
-        if (result.affectedRows == 1) {
-          res.json({result : true, msg : "Delete Category Done!"});
-        } else {
-          res.json({result : false, msg : "Delete Fail!"});
+    connection.beginTransaction(function(err) {
+      if (err) { throw err; }
+      connection.query('delete from request_tag where category_id = ' + category_id, function(err, result) {
+        if (err) {
+          return connection.rollback(function() {
+            throw err;
+          });
         }
-      } else {
-        console.log(err);
-        res.json({result : false, msg : "Delete Fail!"});
-      }
-    });
+
+        connection.query("update service set category_id = null where category_id = " + category_id + ";", function(err, result) {
+          if (err) {
+            return connection.rollback(function() {
+              throw err;
+            });
+          }
+
+          connection.query("update request set category_id = null where category_id = " + category_id + ";", function (err, result) {
+            if (err) {
+              return connection.rollback(function () {
+                throw err;
+              });
+            }
+            connection.commit(function(err) {
+              if (err) {
+                return connection.rollback(function() {
+                  throw err;
+                });
+              } else {
+                console.log('success!');
+                connection.release();
+                res.json({result : true, msg : "Delete Done!"});                
+              }
+            }); // end of commit function
+          }); // end of delete cate
+        }); // end of update service
+      }); // end of update request
+    }); // end of transaction
   });
 });
 
@@ -1092,7 +1177,24 @@ app.get('/request_create', function (req, res) {
 });
 
 app.post('/request_create', function (req, res) {
-  var data = req.body;
+  var rawdata = req.body;
+
+  var data = {
+    title : rawdata.title,
+    description : rawdata.description,
+    city : rawdata.city,
+    state : rawdata.state,
+    category_id : rawdata.category_id,
+    tags : rawdata.tags
+  };
+
+  var imagePath = '';
+  if (rawdata.image != '') {
+    imagePath = rawdata.image.replace("fakepath", "CMPE226");
+  }
+
+  
+
   var today = new Date();
   var currentTime = today.getFullYear() + '-' + (today.getMonth()+1) + '-' + today.getDate() + ' ' + today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
   var category_id = 0;
@@ -1113,7 +1215,7 @@ app.post('/request_create', function (req, res) {
   pool.getConnection(function (err, connection) {
     var query = connection.query('INSERT INTO request SET ?', request, function(err, result) {
       connection.release();
-      console.log(result);
+      console.log('in', imagePath);
       // add to tag_req
       if (err) {
         console.log('db error is: ', err);
@@ -1121,7 +1223,7 @@ app.post('/request_create', function (req, res) {
       } else {
         if (result.affectedRows == 1) {
           var request_id = result.insertId;
-          insertTags(request_id, req.body.tags);
+          insertTags(request_id, req.body.tags, imagePath);
           //return json_true(res, "register done!");
         }
         //console.log('result is: ', result.affectedRows);
@@ -1130,7 +1232,7 @@ app.post('/request_create', function (req, res) {
     //console.log(query);
   });
 
-  var insertTags = function (request_id, tags) {
+  var insertTags = function (request_id, tags, imagePath) {
     var query1 = "INSERT INTO request_tag (tag_name, request_id) VALUES ?";
     var values = [];
     for(var i = 0; i < tags.length; i++) {
@@ -1151,12 +1253,34 @@ app.post('/request_create', function (req, res) {
           res.json({result : false, msg : err});
         } else {
           if (result.affectedRows == tags.length) {
-            return json_true(res, "create done!");
+            insertImage(request_id, imagePath)
+          } else {
+            return json_true(res, "create fail!");  
           }
           //console.log('result is: ', result.affectedRows);
         }
       });
       //console.log(query);
+    });
+  };
+
+  var insertImage = function (request_id, imagePath) {
+    console.log(imagePath);
+    mongoose.connection.on('open', function () {
+      var a = new imageModel({
+        type:'request',
+        id:request_id,
+        image:fs.readFileSync(imagePath)
+      });
+
+      a.save(function (err, a) {
+        if (err) {
+          logger.info(err) ;
+        } else {
+          logger.info('saved img to mongo(request)' + request_id);
+          return json_true(res, "create done!");          
+        }
+      });
     });
   };
 })
