@@ -1,4 +1,6 @@
 
+SET SQL_SAFE_UPDATES = 0;
+
 insert into category values(null, 'Automotive', 'Automotive services');
 insert into category values(null, 'Computer', 'Computer services');
 insert into category values(null, 'Financial', 'Financial services');
@@ -32,18 +34,6 @@ insert into service values(null, 'Toyota Master Technician', 'video link', 'imag
 	'Toyota Master Technician provide car service ', 
     'San Francisco', 'CA', 10, date(now()), 1);*/
 
-SET SQL_SAFE_UPDATES = 0;
-delete from review;
-select * from user;
-delete from user where fname='p';
-desc user;
-select s.service_id, s.title, s.time posttime, c.category_name, s.city, s.description, u.fname, u.phone, u.email, avg(rate) avgrate 
-from service as s, user as u, category as c, review as r 
-where s.category_id = c.category_id and u.user_id = s.user_id and r.service_id = s.service_id and s.service_id = 3;
 
 insert into favorite values (10,1);
-update user set pwd = 'sha1$98ae10c4$1$01377397bdf8bf945541e5579c229ed6df582c67' where user_id = 9;
 
-select fname, time, comment, rate from review as r, user as u where u.user_id = r.user_id;
-
-select u.fname, r.time, r.comment, r.rate from review as r, service as s, user as u where r.service_id = s.service_id and u.user_id = r.user_id and s.service_id= 3;

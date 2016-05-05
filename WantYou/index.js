@@ -12,8 +12,8 @@ var request = require("request");
 var moment = require('moment');
 var mysql = require("mysql");
 var winston = require('winston');
-var mongoose = require('mongoose');
 
+var mongoose = require('mongoose');
 var uri = 'mongodb://admin:admin@ds013202.mlab.com:13202/cmpe226';
 
 
@@ -661,14 +661,12 @@ app.post('/removeuser', function (req, res) {
             throw err;
           });
         }
-
         connection.query('delete from request where user_id = ' + user_id, function(err, result) {
           if (err) {
             return connection.rollback(function() {
               throw err;
             });
           }
-
           connection.query('delete from user where user_id = ' + user_id, function (err, result) {
             if (err) {
               return connection.rollback(function () {
@@ -685,14 +683,11 @@ app.post('/removeuser', function (req, res) {
                 connection.release();
                 res.json({result : true, msg : "Delete Done!"});                
               }
-
             });
           });
-
         });
       });
     });
-    
   });
 });
 
@@ -763,14 +758,12 @@ app.post('/removetag', function (req, res) {
             throw err;
           });
         }
-
         connection.query('delete from service_tag where tag_name = ' + tag_name, function(err, result) {
           if (err) {
             return connection.rollback(function() {
               throw err;
             });
           }
-
           connection.query('delete from tag where tag_name = ' + tag_name, function (err, result) {
             if (err) {
               return connection.rollback(function () {
@@ -801,20 +794,18 @@ app.post('/removecategory', function (req, res) {
   pool.getConnection(function (err, connection) {
     connection.beginTransaction(function(err) {
       if (err) { throw err; }
-      connection.query('delete from request_tag where category_id = ' + category_id, function(err, result) {
+      connection.query('delete from category where category_id = ' + category_id, function(err, result) {
         if (err) {
           return connection.rollback(function() {
             throw err;
           });
         }
-
         connection.query("update service set category_id = null where category_id = " + category_id + ";", function(err, result) {
           if (err) {
             return connection.rollback(function() {
               throw err;
             });
           }
-
           connection.query("update request set category_id = null where category_id = " + category_id + ";", function (err, result) {
             if (err) {
               return connection.rollback(function () {
@@ -1253,7 +1244,8 @@ app.post('/request_create', function (req, res) {
           res.json({result : false, msg : err});
         } else {
           if (result.affectedRows == tags.length) {
-            insertImage(request_id, imagePath)
+            return json_true(res, "create done!");  
+            //insertImage(request_id, imagePath)
           } else {
             return json_true(res, "create fail!");  
           }
@@ -1278,7 +1270,7 @@ app.post('/request_create', function (req, res) {
           logger.info(err) ;
         } else {
           logger.info('saved img to mongo(request)' + request_id);
-          return json_true(res, "create done!");          
+          //return json_true(res, "create done!");          
         }
       });
     });
